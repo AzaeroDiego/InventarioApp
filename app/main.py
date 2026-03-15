@@ -726,8 +726,8 @@ def lotes():
 @login_required
 def nuevo_lote():
     """Preparar nuevo lote (mezclar productos)"""
-    # Filtrar solo ingredientes (productos que NO se venden)
-    productos = Producto.query.filter_by(activo=True, se_vende=False).all()
+    # Obtener todos los productos activos (tanto para vender como ingredientes)
+    productos = Producto.query.filter_by(activo=True).all()
     
     if request.method == 'POST':
         import json
@@ -857,7 +857,8 @@ def nuevo_lote():
         'nombre': p.nombre,
         'precio': float(p.precio),
         'cantidad_stock': p.cantidad_stock,
-        'activo': p.activo
+        'activo': p.activo,
+        'se_vende': p.se_vende
     } for p in productos])
     
     return render_template('main/nuevo_lote.html', productos_json=productos_json)
