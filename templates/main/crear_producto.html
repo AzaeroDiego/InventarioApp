@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Producto - Gestión de Inventario{% endblock %}
+{% block page_title %}Crear Nuevo Producto{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="nombre">
+                                    <i class="fas fa-box"></i> Nombre del Producto *
+                                </label>
+                                <input type="text" id="nombre" name="nombre" required>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="sku">
+                                    <i class="fas fa-barcode"></i> SKU (Código) *
+                                </label>
+                                <input type="text" id="sku" name="sku" required placeholder="Ej: PRD-001">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="categoria_id">
+                                    <i class="fas fa-tag"></i> Categoría *
+                                </label>
+                                <select id="categoria_id" name="categoria_id" required>
+                                    <option value="">Selecciona una categoría</option>
+                                    {% for cat in categorias %}
+                                    <option value="{{ cat.id }}">{{ cat.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="precio">
+                                    Precio Unitario S/ *
+                                </label>
+                                <input type="number" id="precio" name="precio" step="0.01" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="cantidad_stock">
+                                    <i class="fas fa-cubes"></i> Stock Inicial
+                                </label>
+                                <input type="number" id="cantidad_stock" name="cantidad_stock" value="0" min="0">
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="stock_minimo">
+                                    <i class="fas fa-exclamation"></i> Stock Mínimo
+                                </label>
+                                <input type="number" id="stock_minimo" name="stock_minimo" value="5" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>
+                                    <i class="fas fa-shopping-cart"></i> ¿Se Vende?
+                                </label>
+                                <select name="se_vende">
+                                    <option value="1" selected>SI - Es producto de venta</option>
+                                    <option value="0">NO - Es ingrediente para lotes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descripcion">
+                            <i class="fas fa-align-left"></i> Descripción
+                        </label>
+                        <textarea id="descripcion" name="descripcion" placeholder="Descripción del producto..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="imagen">
+                            <i class="fas fa-image"></i> Imagen del Producto
+                        </label>
+                        <input type="file" id="imagen" name="imagen" accept="image/*">
+                        <small style="color: #7f8c8d;">PNG, JPG, GIF (máx. 16MB)</small>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Crear Producto
+                        </button>
+                        <a href="{{ url_for('main.productos') }}" class="btn btn-light">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Información Importante</h3>
+            </div>
+            <div class="card-body">
+                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 10px;">SKU</h4>
+                <p style="font-size: 13px; color: #7f8c8d; margin-bottom: 15px;">
+                    Código único para identificar el producto. Ejemplo: REB-PKG, PTY-3L
+                </p>
+
+                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 10px;">Stock Mínimo</h4>
+                <p style="font-size: 13px; color: #7f8c8d; margin-bottom: 15px;">
+                    Cuando el stock llegue a este nivel, se generará una alerta.
+                </p>
+
+                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 10px;">Productos Iniciales</h4>
+                <ul style="font-size: 13px; color: #7f8c8d; padding-left: 20px;">
+                    <li>Rebelde Paquete</li>
+                    <li>Party Box Lata</li>
+                    <li>Party Box 3L</li>
+                    <li>Pisco</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Venta - Gestión de Inventario{% endblock %}
+{% block page_title %}🛒 Registrar Nueva Venta{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Datos de la Venta</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" onsubmit="return validarFormulario();">
+                        <div class="form-group">
+                            <label for="vendedor_id"><strong>Vendedor</strong></label>
+                            <select id="vendedor_id" name="vendedor_id">
+                                <option value="">-- Sin asignar --</option>
+                                {% for vendedor in vendedores %}
+                                <option value="{{ vendedor.id }}">{{ vendedor.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <small style="color: #95a5a6;">Selecciona quién realiza la venta (opcional)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="producto_id"><strong>Producto *</strong></label>
+                            <select id="producto_id" name="producto_id" required onchange="actualizarPrecio()">
+                                <option value="">-- Seleccionar Producto --</option>
+                                {% for producto in productos %}
+                                <option value="{{ producto.id }}" data-precio="{{ producto.precio }}" data-stock="{{ producto.cantidad_stock }}">
+                                    {{ producto.nombre }} (Stock: {{ producto.cantidad_stock }}) - S/ {{ "%.2f"|format(producto.precio) }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small id="info-stock" style="color: #3498db; margin-top: 5px; display: block;"></small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cantidad"><strong>Cantidad *</strong></label>
+                            <input type="number" id="cantidad" name="cantidad" min="1" required onchange="calcularTotal()" placeholder="Cantidad a vender">
+                            <small id="alerta-stock" style="color: #e74c3c; margin-top: 5px; display: none;"></small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="precio_unitario"><strong>Precio Unitario *</strong></label>
+                            <div style="display: flex; gap: 10px;">
+                                <span style="padding: 8px; background: #ecf0f1; border-radius: 4px; min-width: 60px;">S/</span>
+                                <input type="number" id="precio_unitario" name="precio_unitario" step="0.01" min="0" required onchange="calcularTotal()" placeholder="Precio de venta">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="motivo"><strong>Motivo de Venta</strong></label>
+                            <select id="motivo" name="motivo">
+                                <option value="Venta normal">Venta normal</option>
+                                <option value="Venta con descuento">Venta con descuento</option>
+                                <option value="Devolución">Devolución</option>
+                                <option value="Muestra</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="observaciones"><strong>Observaciones</strong></label>
+                            <textarea id="observaciones" name="observaciones" rows="3" placeholder="Notas adicionales sobre la venta (opcional)"></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Registrar Venta
+                            </button>
+                            <a href="{{ url_for('main.ventas') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA - RESUMEN -->
+        <div class="col-4">
+            <div class="card" style="position: sticky; top: 80px;">
+                <div class="card-header">
+                    <h3>Resumen</h3>
+                </div>
+                <div class="card-body">
+                    <div style="margin-bottom: 15px;">
+                        <small style="color: #7f8c8d;">Producto Seleccionado</small>
+                        <p id="resumen-producto" style="margin: 5px 0; font-weight: bold;">-</p>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <small style="color: #7f8c8d;">Stock Disponible</small>
+                        <p id="resumen-stock" style="margin: 5px 0; font-weight: bold; color: #e74c3c;">-</p>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <small style="color: #7f8c8d;">Precio Unitario</small>
+                        <p id="resumen-precio" style="margin: 5px 0; font-weight: bold;">S/ 0.00</p>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <small style="color: #7f8c8d;">Cantidad a Vender</small>
+                        <p id="resumen-cantidad" style="margin: 5px 0; font-weight: bold;">0</p>
+                    </div>
+
+                    <hr style="margin: 15px 0; border: none; border-top: 1px solid #ecf0f1;">
+
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 4px;">
+                        <small style="color: #7f8c8d;">TOTAL A VENDER</small>
+                        <p id="resumen-total" style="margin: 10px 0; font-size: 24px; font-weight: bold; color: #2ecc71;">S/ 0.00</p>
+                    </div>
+
+                    <div style="margin-top: 15px; padding: 10px; background: #e8f4f8; border-radius: 4px; border-left: 4px solid #3498db; display: none;" id="alerta-info">
+                        <small style="color: #2c3e50;"><i class="fas fa-info-circle"></i> Se disminuirá el stock automáticamente</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function actualizarPrecio() {
+    const select = document.getElementById('producto_id');
+    const opcion = select.options[select.selectedIndex];
+    
+    if (opcion.value) {
+        const precio = opcion.dataset.precio;
+        const stock = opcion.dataset.stock;
+        const nombre = opcion.text;
+        
+        document.getElementById('precio_unitario').value = precio;
+        document.getElementById('resumen-producto').textContent = nombre.split('(')[0].trim();
+        document.getElementById('resumen-stock').textContent = stock + ' unidades';
+        document.getElementById('info-stock').textContent = `Stock disponible: ${stock} unidades`;
+        
+        calcularTotal();
+    } else {
+        document.getElementById('resumen-producto').textContent = '-';
+        document.getElementById('resumen-stock').textContent = '-';
+        document.getElementById('resumen-precio').textContent = 'S/ 0.00';
+        document.getElementById('resumen-total').textContent = 'S/ 0.00';
+    }
+}
+
+function calcularTotal() {
+    const cantidad = parseFloat(document.getElementById('cantidad').value) || 0;
+    const precio = parseFloat(document.getElementById('precio_unitario').value) || 0;
+    const select = document.getElementById('producto_id');
+    const opcion = select.options[select.selectedIndex];
+    const stock = opcion.dataset.stock ? parseInt(opcion.dataset.stock) : 0;
+    
+    const total = cantidad * precio;
+    
+    document.getElementById('resumen-cantidad').textContent = cantidad;
+    document.getElementById('resumen-precio').textContent = 'S/ ' + precio.toFixed(2);
+    document.getElementById('resumen-total').textContent = 'S/ ' + total.toFixed(2);
+    
+    // Verificar si hay stock suficiente
+    const alertaStock = document.getElementById('alerta-stock');
+    if (cantidad > stock && cantidad > 0) {
+        alertaStock.style.display = 'block';
+        alertaStock.textContent = `⚠️ Solo hay ${stock} unidades disponibles`;
+        alertaStock.style.color = '#e74c3c';
+    } else {
+        alertaStock.style.display = 'none';
+    }
+}
+
+function validarFormulario() {
+    const producto = document.getElementById('producto_id').value;
+    const cantidad = parseInt(document.getElementById('cantidad').value) || 0;
+    const precio = parseFloat(document.getElementById('precio_unitario').value) || 0;
+    
+    if (!producto) {
+        alert('Debe seleccionar un producto');
+        return false;
+    }
+    
+    if (cantidad <= 0) {
+        alert('La cantidad debe ser mayor a 0');
+        return false;
+    }
+    
+    if (precio <= 0) {
+        alert('El precio debe ser mayor a 0');
+        return false;
+    }
+    
+    // Verificar stock
+    const select = document.getElementById('producto_id');
+    const opcion = select.options[select.selectedIndex];
+    const stock = parseInt(opcion.dataset.stock) || 0;
+    
+    if (cantidad > stock) {
+        if (!confirm(`Solo hay ${stock} unidades disponibles. ¿Deseas continuar de todas formas?`)) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+</script>
+{% endblock %}

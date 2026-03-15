@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Gestión de Inventario{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-3">
+        <div class="stat-box">
+            <i class="fas fa-boxes stat-icon" style="color: #2ecc71;"></i>
+            <div class="stat-value">{{ total_productos }}</div>
+            <div class="stat-label">Total de Productos</div>
+        </div>
+    </div>
+
+    <div class="col-3">
+        <div class="stat-box danger">
+            <i class="fas fa-exclamation-triangle stat-icon" style="color: #e74c3c;"></i>
+            <div class="stat-value">{{ productos_bajo_stock|length }}</div>
+            <div class="stat-label">Bajo Stock</div>
+        </div>
+    </div>
+
+    <div class="col-3">
+        <div class="stat-box info">
+            <i class="fas fa-dollar-sign stat-icon" style="color: #3498db;"></i>
+            <div class="stat-value">S/ {{ "{:,.2f}".format(valor_total).replace(',', '.') }}</div>
+            <div class="stat-label">Valor del Inventario</div>
+        </div>
+    </div>
+
+    <div class="col-3">
+        <div class="stat-box warning">
+            <i class="fas fa-bell stat-icon" style="color: #f39c12;"></i>
+            <div class="stat-value">{{ alertas_no_leidas }}</div>
+            <div class="stat-label">Alertas sin Leer</div>
+        </div>
+    </div>
+</div>
+
+<!-- FILA DE VENTAS -->
+<div class="row mt-4">
+    <div class="col-3">
+        <div class="stat-box" style="border-top-color: #27ae60;">
+            <i class="fas fa-receipt stat-icon" style="color: #27ae60;"></i>
+            <div class="stat-value">{{ ventas_hoy|length }}</div>
+            <div class="stat-label">Ventas Hoy</div>
+            <a href="{{ url_for('main.ventas') }}" style="color: #3498db; text-decoration: none; font-size: 12px; margin-top: 5px; display: block;">
+                Ver detalle →
+            </a>
+        </div>
+    </div>
+
+    <div class="col-3">
+        <div class="stat-box" style="border-top-color: #16a085;">
+            <i class="fas fa-money-bill stat-icon" style="color: #16a085;"></i>
+            <div class="stat-value">S/ {{ "{:,.2f}".format(total_ventas_hoy).replace(',', '.') }}</div>
+            <div class="stat-label">Ingresos Hoy</div>
+            <a href="{{ url_for('main.historial_ventas') }}" style="color: #3498db; text-decoration: none; font-size: 12px; margin-top: 5px; display: block;">
+                Historial →
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-triangle-exclamation"></i> Productos con Bajo Stock
+                </h3>
+            </div>
+            <div class="card-body">
+                {% if productos_bajo_stock %}
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Stock</th>
+                                <th>Mínimo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in productos_bajo_stock[:5] %}
+                            <tr>
+                                <td><strong>{{ producto.nombre }}</strong></td>
+                                <td>{{ producto.cantidad_stock }}</td>
+                                <td>{{ producto.stock_minimo }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% if productos_bajo_stock|length > 5 %}
+                    <p class="text-center text-muted mt-2">
+                        +{{ productos_bajo_stock|length - 5 }} más
+                    </p>
+                    {% endif %}
+                {% else %}
+                    <p class="text-center text-muted">
+                        <i class="fas fa-check-circle"></i> Todos los productos tienen stock adecuado
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-history"></i> Actividad Reciente
+                </h3>
+            </div>
+            <div class="card-body">
+                {% if movimientos_recientes %}
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mov in movimientos_recientes[:5] %}
+                            <tr>
+                                <td>
+                                    {% if mov.tipo == 'entrada' %}
+                                        <span class="badge badge-success">Entrada</span>
+                                    {% elif mov.tipo == 'salida' %}
+                                        <span class="badge badge-danger">Salida</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">{{ mov.tipo|title }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ mov.producto.nombre }}</td>
+                                <td>{{ mov.cantidad }}</td>
+                                <td style="font-size: 12px;">{{ mov.fecha.strftime('%d/%m %H:%M') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-center text-muted">
+                        <i class="fas fa-inbox"></i> No hay movimientos registrados
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-arrow-down"></i> Entradas (últimos 7 días)
+                </h3>
+            </div>
+            <div class="card-body">
+                <div style="text-align: center; font-size: 32px; font-weight: 700; color: #2ecc71;">
+                    {{ entradas_recientes }}
+                </div>
+                <p class="text-center text-muted mt-2">movimientos registrados</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-arrow-up"></i> Salidas (últimos 7 días)
+                </h3>
+            </div>
+            <div class="card-body">
+                <div style="text-align: center; font-size: 32px; font-weight: 700; color: #e74c3c;">
+                    {{ salidas_recientes }}
+                </div>
+                <p class="text-center text-muted mt-2">movimientos registrados</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="text-align: center; margin-top: 40px;">
+    <a href="{{ url_for('main.productos') }}" class="btn btn-primary mr-2">
+        <i class="fas fa-box"></i> Gestionar Productos
+    </a>
+    <a href="{{ url_for('main.reportes') }}" class="btn btn-secondary">
+        <i class="fas fa-chart-bar"></i> Ver Reportes
+    </a>
+</div>
+{% endblock %}

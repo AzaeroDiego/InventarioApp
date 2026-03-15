@@ -1,0 +1,220 @@
+═══════════════════════════════════════════════════════════════════════════════
+                   🚀 GUÍA RÁPIDA DE INICIO - 5 MINUTOS
+═══════════════════════════════════════════════════════════════════════════════
+
+UBICACIÓN DEL PROYECTO:
+C:\Users\azaer\Documents\Diego\Bering\InventarioApp
+
+PASO 1: PREPARAR EL ENTORNO (1 minuto)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Abre PowerShell o CMD
+2. Ve a la carpeta InventarioApp:
+   cd C:\Users\azaer\Documents\Diego\Bering\InventarioApp
+
+3. Crea el entorno virtual:
+   python -m venv venv
+
+4. Activa el entorno:
+   venv\Scripts\activate
+
+   [Deberías ver "(venv)" en la terminal]
+
+PASO 2: INSTALAR DEPENDENCIAS (2 minutos)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+$pip install -r requirements.txt
+
+[Espera a que termine la instalación]
+
+PASO 3: INICIALIZAR LA BASE DE DATOS (30 segundos)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+$flask init-db
+
+[Deberías ver: "Base de datos inicializada correctamente"]
+
+PASO 4: EJECUTAR LA APLICACIÓN (30 segundos)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+$python run.py
+
+[Deberías ver un mensaje como:]
+ * Running on http://127.0.0.1:5000/
+ * WARNING: This is a development server
+
+PASO 5: ACCEDER A LA APLICACIÓN (1 minuto)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Abre el navegador (Chrome, Firefox, Edge, etc.)
+2. Ve a: http://localhost:5000
+3. Inicia sesión con:
+   Email:    demo@example.com
+   Password: 123456
+
+¡LISTO! 🎉
+
+═══════════════════════════════════════════════════════════════════════════════
+
+QUÉ VERÁS EN LA PANTALLA:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. SIDEBAR IZQUIERDO (navegación)
+   • Dashboard
+   • Productos
+   • Categorías
+   • Entrada de Stock
+   • Salida de Stock
+   • Historial
+   • Alertas
+   • Reportes
+
+2. CONTENIDO PRINCIPAL
+   • Estadísticas en cuadrículas
+   • Tabla de productos
+   • Gráficos interactivos
+   • Etc...
+
+3. DATOS YA INCLUIDOS
+   ✓ 4 Categorías
+   ✓ 4 Productos
+   ✓ Códigos QR generados
+   ✓ Stock de ejemplo
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PRIMERAS COSAS QUE HACER:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. EXPLORAR EL DASHBOARD
+   • Ve a Dashboard en el sidebar
+   • Verás métricas principales
+   • Hay 4 productos de ejemplo
+
+2. VER PRODUCTOS
+   • Haz clic en "Productos"
+   • Verás tabla con 4 bebidas
+   • Puedes ver el código QR de cada una
+
+3. CREAR UN NUEVO PRODUCTO
+   • Haz clic en "+ Nuevo Producto"
+   • Llena el formulario
+   • El sistema genera QR automáticamente
+
+4. REGISTRAR ENTRADA DE STOCK
+   • Haz clic en "Entrada de Stock"
+   • Selecciona un producto
+   • Ingresa cantidad
+   • Se actualiza automáticamente
+
+5. VER ALERTAS
+   • Si algún producto baja de stock mínimo
+   • Aparecerá en "Alertas"
+   • Puedes hacer entrada rápida
+
+6. VER REPORTES
+   • Gráficos interactivos
+   • Puedes descargar en CSV
+   • Análisis de datos
+
+═══════════════════════════════════════════════════════════════════════════════
+
+EN CASO DE ERRORES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ERROR: "No module named flask"
+SOLUCIÓN: Activa el entorno virtual y reinstala:
+  - venv\Scripts\activate
+  - pip install -r requirements.txt
+
+ERROR: "inventario.db not found"
+SOLUCIÓN: Ejecuta la inicialización:
+  - flask init-db
+
+ERROR: "Address already in use"
+SOLUCIÓN: El puerto 5000 está ocupado, espera o cambia:
+  - python run.py
+
+ERROR: "Can't open inventario.db"
+SOLUCIÓN: Elimina el archivo .db y recrealo:
+  - Borra inventario.db
+  - Ejecuta: flask init-db
+
+ERROR: "Template not found"
+SOLUCIÓN: Asegúrate de estar en la carpeta correcta:
+  - cd InventarioApp
+  - python run.py
+
+═══════════════════════════════════════════════════════════════════════════════
+
+CARACTERÍSTICAS CLAVE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Todo en español
+✅ Interface moderna y responsiva
+✅ Funciona en desktop y móvil
+✅ Códigos QR automáticos
+✅ Alertas de bajo stock
+✅ Reportes con gráficos
+✅ Exportar a CSV
+✅ Seguro (contraseñas encriptadas)
+✅ Rápido (base de datos optimizada)
+✅ Fácil de usar (interfaz intuitiva)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+COMANDOS ÚTILES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Activar entorno virtual
+venv\Scripts\activate
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Inicializar base de datos
+flask init-db
+
+# Crear usuario de prueba
+flask create-user
+
+# Ejecutar servidor
+python run.py
+
+# Detener servidor
+Ctrl + C
+
+# Desactivar entorno
+deactivate
+
+═══════════════════════════════════════════════════════════════════════════════
+
+ARCHIVOS IMPORTANTES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📄 README.md                 → Guía de instalación completa
+📄 MANUAL_USUARIO.md         → Guía de uso detallada
+📄 ESPECIFICACIONES.md       → Detalles técnicos
+📄 PROJECT_SUMMARY.txt       → Resumen del proyecto
+📄 INICIO_RAPIDO.html        → Guía visual (abrir en navegador)
+📄 CHECKLIST_CARACTERISTICAS.txt → Todas las features
+
+═══════════════════════════════════════════════════════════════════════════════
+
+¿NECESITAS AYUDA?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Lee MANUAL_USUARIO.md para instrucciones detalladas
+2. Abre INICIO_RAPIDO.html en tu navegador para guía visual
+3. Revisa ESPECIFICACIONES.md para detalles técnicos
+4. Presiona F12 en el navegador para ver la consola de errores
+
+═══════════════════════════════════════════════════════════════════════════════
+
+FELICIDADES! 🎉
+
+Tu sistema de gestión de inventario está listo.
+
+Versión: 1.0.0
+Estado: FUNCIONAL Y LISTO PARA USAR
+═══════════════════════════════════════════════════════════════════════════════

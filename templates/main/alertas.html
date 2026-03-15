@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Alertas - Gestión de Inventario{% endblock %}
+{% block page_title %}Alertas del Sistema{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-bell"></i> Alertas de Bajo Stock
+        </h3>
+    </div>
+    <div class="card-body">
+        {% if alertas %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Stock Actual</th>
+                    <th>Stock Mínimo</th>
+                    <th>Mensaje</th>
+                    <th>Fecha</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alerta in alertas %}
+                <tr style="border-left: 4px solid #e74c3c;">
+                    <td><strong>{{ alerta.producto.nombre }}</strong></td>
+                    <td>
+                        <span style="color: #e74c3c; font-weight: 600;">
+                            {{ alerta.producto.cantidad_stock }}
+                        </span>
+                    </td>
+                    <td>{{ alerta.producto.stock_minimo }}</td>
+                    <td>{{ alerta.mensaje }}</td>
+                    <td style="font-size: 13px;">{{ alerta.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('main.entrada_stock') }}?producto_id={{ alerta.producto_id }}" class="btn btn-sm btn-success">
+                            <i class="fas fa-arrow-down"></i> Entrada
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 40px;">
+            <i class="fas fa-check-circle" style="font-size: 48px; color: #2ecc71; margin-bottom: 15px; display: block;"></i>
+            <h3 style="color: #2ecc71; margin: 0;">Excelente</h3>
+            <p style="color: #7f8c8d;">No hay alertas de bajo stock en este momento</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

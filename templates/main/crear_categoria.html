@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Categoría - Gestión de Inventario{% endblock %}
+{% block page_title %}Crear Nueva Categoría{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-6">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="nombre">
+                            <i class="fas fa-tag"></i> Nombre de la Categoría *
+                        </label>
+                        <input type="text" id="nombre" name="nombre" required placeholder="Ej: Bebidas Alcohólicas">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="color">
+                            <i class="fas fa-palette"></i> Color *
+                        </label>
+                        <input type="color" id="color" name="color" value="#3498db" required>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Crear Categoría
+                        </button>
+                        <a href="{{ url_for('main.categorias') }}" class="btn btn-light">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Categorías Existentes</h3>
+            </div>
+            <div class="card-body">
+                <div>
+                    <a href="{{ url_for('main.categorias') }}" style="color: var(--primary); text-decoration: none;">
+                        <i class="fas fa-arrow-left"></i> Ver todas las categorías
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

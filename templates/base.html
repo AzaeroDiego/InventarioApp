@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestión de Inventario{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="container-fluid">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-boxes"></i>
+                <h1>Sistema de Inventario</h1>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <div class="section-title">Gestión</div>
+
+                <a href="{{ url_for('main.productos') }}" class="{% if request.endpoint == 'main.productos' %}active{% endif %}">
+                    <i class="fas fa-box"></i>
+                    <span>Productos</span>
+                </a>
+
+                <a href="{{ url_for('main.categorias') }}" class="{% if request.endpoint == 'main.categorias' %}active{% endif %}">
+                    <i class="fas fa-tag"></i>
+                    <span>Categorías</span>
+                </a>
+
+                <div class="section-title">Inventario</div>
+
+                <a href="{{ url_for('main.entrada_stock') }}" class="{% if request.endpoint == 'main.entrada_stock' %}active{% endif %}">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>Entrada de Stock</span>
+                </a>
+
+                <a href="{{ url_for('main.salida_stock') }}" class="{% if request.endpoint == 'main.salida_stock' %}active{% endif %}">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Salida de Stock</span>
+                </a>
+
+                <a href="{{ url_for('main.movimientos_stock') }}" class="{% if request.endpoint == 'main.movimientos_stock' %}active{% endif %}">
+                    <i class="fas fa-list"></i>
+                    <span>Historial</span>
+                </a>
+
+                <div class="section-title">Ventas</div>
+
+                <a href="{{ url_for('main.ventas') }}" class="{% if request.endpoint == 'main.ventas' %}active{% endif %}">
+                    <i class="fas fa-receipt"></i>
+                    <span>Ventas del Día</span>
+                </a>
+
+                <a href="{{ url_for('main.nueva_venta') }}" class="{% if request.endpoint == 'main.nueva_venta' %}active{% endif %}">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Nueva Venta</span>
+                </a>
+
+                <a href="{{ url_for('main.historial_ventas') }}" class="{% if request.endpoint == 'main.historial_ventas' %}active{% endif %}">
+                    <i class="fas fa-history"></i>
+                    <span>Historial de Ventas</span>
+                </a>
+
+                <div class="section-title">Gestión Avanzada</div>
+
+                <a href="{{ url_for('main.lotes') }}" class="{% if request.endpoint == 'main.lotes' %}active{% endif %}">
+                    <i class="fas fa-flask"></i>
+                    <span>Lotes (Mezclas)</span>
+                </a>
+
+                <a href="{{ url_for('main.vendedores') }}" class="{% if request.endpoint == 'main.vendedores' %}active{% endif %}">
+                    <i class="fas fa-users"></i>
+                    <span>Vendedores</span>
+                </a>
+
+                <a href="{{ url_for('main.admin_productos') }}" class="{% if request.endpoint == 'main.admin_productos' %}active{% endif %}">
+                    <i class="fas fa-cog"></i>
+                    <span>Editar Productos</span>
+                </a>
+
+                <div class="section-title">Administración</div>
+
+                <a href="{{ url_for('main.admin_usuarios') }}" class="{% if request.endpoint == 'main.admin_usuarios' %}active{% endif %}">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Gestión de Usuarios</span>
+                </a>
+
+                <div class="section-title">Reportes</div>
+
+                <a href="{{ url_for('main.alertas') }}" class="{% if request.endpoint == 'main.alertas' %}active{% endif %}">
+                    <i class="fas fa-bell"></i>
+                    <span>Alertas</span>
+                    <span class="badge" id="alertas-count" style="display: none;"></span>
+                </a>
+
+                <a href="{{ url_for('main.reportes') }}" class="{% if request.endpoint == 'main.reportes' %}active{% endif %}">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reportes</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-user">
+                <p style="font-size: 11px; margin-bottom: 10px; color: rgba(255,255,255,0.7);">
+                    Conectado como<br>
+                    <strong style="font-size: 12px;">{{ current_user.nombre_completo[:15] }}</strong>
+                </p>
+                <a href="{{ url_for('auth.logout') }}" style="display: block;">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- TOP BAR -->
+            <div class="top-bar">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button class="menu-toggle" id="menuToggle" style="display: none;">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 style="margin: 0;">{% block page_title %}Panel de Control{% endblock %}</h2>
+                </div>
+                <div class="user-info">
+                    <span id="hora-actual"></span>
+                    <div class="user-avatar" style="cursor: help;" title="{{ current_user.nombre_completo }}">{{ current_user.nombre_completo[0].upper() }}</div>
+                </div>
+            </div>
+
+            <!-- CONTENIDO -->
+            <div class="content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'success' if category == 'success' else 'error' if category == 'error' else 'info' }}">
+                                <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Menú hamburguesa (móvil)
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        // Mostrar/ocultar menú en móvil
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('show');
+                sidebarOverlay.classList.toggle('show');
+            });
+
+            // Cerrar cuando se hace clic en el overlay
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+
+            // Cerrar cuando se hace clic en un link
+            document.querySelectorAll('.sidebar-nav a').forEach(link => {
+                link.addEventListener('click', function() {
+                    sidebar.classList.remove('show');
+                    sidebarOverlay.classList.remove('show');
+                });
+            });
+        }
+
+        // Mostrar/ocultar menú toggle según tamaño de pantalla
+        function checkResponsive() {
+            if (window.innerWidth <= 768) {
+                menuToggle.style.display = 'flex';
+            } else {
+                menuToggle.style.display = 'none';
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            }
+        }
+
+        checkResponsive();
+        window.addEventListener('resize', checkResponsive);
+
+        // Actualizar hora
+        function actualizarHora() {
+            const fecha = new Date();
+            const horas = String(fecha.getHours()).padStart(2, '0');
+            const minutos = String(fecha.getMinutes()).padStart(2, '0');
+            document.getElementById('hora-actual').textContent = `${horas}:${minutos}`;
+        }
+        actualizarHora();
+        setInterval(actualizarHora, 60000);
+
+        // Cargar alertas no leídas
+        function cargarAlertas() {
+            fetch('/api/alertas/no-leidas')
+                .then(r => r.json())
+                .then(data => {
+                    const badge = document.getElementById('alertas-count');
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                });
+        }
+        cargarAlertas();
+        setInterval(cargarAlertas, 30000);
+    </script>
+
+    {% block extra_js %}{% endblock %}
+    {% endif %}
+</body>
+</html>

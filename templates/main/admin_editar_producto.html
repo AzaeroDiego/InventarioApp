@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Producto - Gestión de Inventario{% endblock %}
+{% block page_title %}✏️ Editar Producto{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>{{ producto.nombre }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="nombre"><strong>Nombre del Producto *</strong></label>
+                            <input type="text" id="nombre" name="nombre" value="{{ producto.nombre }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sku"><strong>SKU *</strong></label>
+                            <input type="text" id="sku" name="sku" value="{{ producto.sku }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="categoria_id"><strong>Categoría *</strong></label>
+                            <select id="categoria_id" name="categoria_id" required>
+                                <option>-- Seleccionar --</option>
+                                {% for cat in categorias %}
+                                <option value="{{ cat.id }}" {% if cat.id == producto.categoria_id %}selected{% endif %}>
+                                    {{ cat.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="precio"><strong>Precio S/ *</strong></label>
+                                    <input type="number" id="precio" name="precio" step="0.01" value="{{ producto.precio }}" required>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="cantidad_stock"><strong>Stock Actual *</strong></label>
+                                    <input type="number" id="cantidad_stock" name="cantidad_stock" value="{{ producto.cantidad_stock }}" 
+                                           {% if 'Yarda' in producto.nombre %}readonly style="background: #ecf0f1;"{% else %}required{% endif %}>
+                                    {% if 'Yarda' in producto.nombre %}
+                                    <small style="color: #e74c3c; display: block; margin-top: 5px;">
+                                        <i class="fas fa-lock"></i> Este stock se actualiza automáticamente al preparar lotes
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="stock_minimo"><strong>Stock Mínimo *</strong></label>
+                            <input type="number" id="stock_minimo" name="stock_minimo" value="{{ producto.stock_minimo }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="descripcion"><strong>Descripción</strong></label>
+                            <textarea id="descripcion" name="descripcion" rows="3">{{ producto.descripcion }}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" name="activo" {% if producto.activo %}checked{% endif %}>
+                                <strong>Producto Activo</strong>
+                                <small style="color: #7f8c8d; display: block; margin-top: 5px;">
+                                    Si lo desactivas, no aparecerá en la lista de ventas pero se mantienen los datos
+                                </small>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                            <a href="{{ url_for('main.admin_productos') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA -->
+        <div class="col-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Información</h3>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <small style="color: #7f8c8d;">Creado</small><br>
+                        {{ producto.fecha_creacion.strftime('%d/%m/%Y %H:%M') if producto.fecha_creacion else 'N/A' }}
+                    </p>
+
+                    <p style="margin-top: 15px;">
+                        <small style="color: #7f8c8d;">Última actualización</small><br>
+                        {{ producto.fecha_actualizacion.strftime('%d/%m/%Y %H:%M') if producto.fecha_actualizacion else 'N/A' }}
+                    </p>
+
+                    <p style="margin-top: 15px;">
+                        <small style="color: #7f8c8d;">Valor en Stock</small><br>
+                        <strong style="font-size: 18px; color: #2ecc71;">
+                            S/ {{ "%.2f"|format(producto.precio * producto.cantidad_stock) }}
+                        </strong>
+                    </p>
+
+                    {% if producto.bajo_stock %}
+                    <div style="margin-top: 15px; padding: 10px; background: #fadbd8; border-left: 4px solid #e74c3c; border-radius: 4px;">
+                        <small><i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Bajo stock</small>
+                    </div>
+                    {% endif %}
+
+                    {% if producto.codigo_qr %}
+                    <div style="margin-top: 15px;">
+                        <small style="color: #7f8c8d;">Código QR</small><br>
+                        <img src="{{ url_for('static', filename=producto.codigo_qr) }}" style="max-width: 100%; margin-top: 10px; border: 1px solid #ecf0f1; padding: 5px;">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

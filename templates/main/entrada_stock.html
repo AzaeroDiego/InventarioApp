@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Entrada de Stock - Gestión de Inventario{% endblock %}
+{% block page_title %}Registrar Entrada de Stock{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="producto_id">
+                            <i class="fas fa-box"></i> Producto *
+                        </label>
+                        <select id="producto_id" name="producto_id" required>
+                            <option value="">Selecciona un producto</option>
+                            {% for prod in productos %}
+                            <option value="{{ prod.id }}">
+                                {{ prod.nombre }} (SKU: {{ prod.sku }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="cantidad">
+                                    <i class="fas fa-cubes"></i> Cantidad *
+                                </label>
+                                <input type="number" id="cantidad" name="cantidad" min="1" required>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="motivo">
+                                    <i class="fas fa-align-left"></i> Motivo *
+                                </label>
+                                <select id="motivo" name="motivo" required>
+                                    <option value="">Selecciona un motivo</option>
+                                    <option value="Compra">Compra</option>
+                                    <option value="Devolución">Devolución de cliente</option>
+                                    <option value="Ajuste">Ajuste inventario</option>
+                                    <option value="Producción">Producción</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-arrow-down"></i> Registrar Entrada
+                        </button>
+                        <a href="{{ url_for('main.movimientos_stock') }}" class="btn btn-light">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-arrow-down"></i> Entradas
+                </h3>
+            </div>
+            <div class="card-body">
+                <p style="font-size: 13px; color: #7f8c8d;">
+                    Registra cuando ingresa nuevo stock al inventario. Puede ser por compra, devolución de cliente o ajustes.
+                </p>
+                <ul style="font-size: 13px; color: #7f8c8d; padding-left: 20px; line-height: 1.8;">
+                    <li>Selecciona el producto</li>
+                    <li>Inserta la cantidad</li>
+                    <li>Elige el motivo</li>
+                    <li>Confirma la entrada</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

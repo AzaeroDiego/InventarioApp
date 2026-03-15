@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Producto - Gestión de Inventario{% endblock %}
+{% block page_title %}Editar Producto{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="nombre">
+                                    <i class="fas fa-box"></i> Nombre del Producto
+                                </label>
+                                <input type="text" id="nombre" name="nombre" value="{{ producto.nombre }}" required>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>SKU</label>
+                                <input type="text" value="{{ producto.sku }}" disabled style="opacity: 0.6;">
+                                <small style="color: #7f8c8d;">El SKU no puede ser modificado</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="categoria_id">
+                                    <i class="fas fa-tag"></i> Categoría
+                                </label>
+                                <select id="categoria_id" name="categoria_id" required>
+                                    {% for cat in categorias %}
+                                    <option value="{{ cat.id }}" {% if producto.categoria_id == cat.id %}selected{% endif %}>
+                                        {{ cat.nombre }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="precio">
+                                    Precio Unitario S/
+                                </label>
+                                <input type="number" id="precio" name="precio" step="0.01" value="{{ producto.precio }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="cantidad_stock">
+                                    <i class="fas fa-cubes"></i> Stock Actual
+                                </label>
+                                <input type="number" id="cantidad_stock" name="cantidad_stock" value="{{ producto.cantidad_stock }}" min="0" required>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="stock_minimo">
+                                    <i class="fas fa-exclamation"></i> Stock Mínimo
+                                </label>
+                                <input type="number" id="stock_minimo" name="stock_minimo" value="{{ producto.stock_minimo }}" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>
+                                    <i class="fas fa-shopping-cart"></i> ¿Se Vende?
+                                </label>
+                                <select name="se_vende">
+                                    <option value="1" {% if producto.se_vende %}selected{% endif %}>SI - Es producto de venta</option>
+                                    <option value="0" {% if not producto.se_vende %}selected{% endif %}>NO - Es ingrediente para lotes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="imagen">
+                            <i class="fas fa-image"></i> Imagen del Producto
+                        </label>
+                        {% if producto.imagen_url %}
+                        <div style="margin-bottom: 10px;">
+                            <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" style="max-width: 150px; border-radius: 4px;">
+                        </div>
+                        {% endif %}
+                        <input type="file" id="imagen" name="imagen" accept="image/*">
+                        <small style="color: #7f8c8d;">PNG, JPG, GIF (máx. 16MB)</small>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                        <a href="{{ url_for('main.productos') }}" class="btn btn-light">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Información del Producto</h3>
+            </div>
+            <div class="card-body">
+                <div style="margin-bottom: 15px;">
+                    <h4 style="font-size: 13px; font-weight: 600; color: #7f8c8d; text-transform: uppercase; margin-bottom: 5px;">
+                        Categoría
+                    </h4>
+                    <span class="badge" style="background-color: {{ producto.categoria.color }}20; color: {{ producto.categoria.color }};">
+                        {{ producto.categoria.nombre }}
+                    </span>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <h4 style="font-size: 13px; font-weight: 600; color: #7f8c8d; text-transform: uppercase; margin-bottom: 5px;">
+                        Precio Unitario
+                    </h4>
+                    <p style="font-size: 18px; font-weight: 700; margin: 0;">S/ {{ "{:.2f}".format(producto.precio) }}</p>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <h4 style="font-size: 13px; font-weight: 600; color: #7f8c8d; text-transform: uppercase; margin-bottom: 5px;">
+                        Valor Total
+                    </h4>
+                    <p style="font-size: 18px; font-weight: 700; margin: 0;">S/ {{ "{:,.2f}".format(producto.valor_total).replace(',', '.') }}</p>
+                </div>
+
+                <div>
+                    <h4 style="font-size: 13px; font-weight: 600; color: #7f8c8d; text-transform: uppercase; margin-bottom: 5px;">
+                        Estado del Stock
+                    </h4>
+                    {% if producto.bajo_stock %}
+                        <span class="badge badge-danger">Bajo Stock</span>
+                    {% elif producto.cantidad_stock == 0 %}
+                        <span class="badge badge-danger">Sin Stock</span>
+                    {% else %}
+                        <span class="badge badge-success">OK</span>
+                    {% endif %}
+                </div>
+
+                {% if producto.codigo_qr %}
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ecf0f1;">
+                    <a href="{{ producto.codigo_qr }}" target="_blank" class="btn btn-secondary" style="width: 100%;">
+                        <i class="fas fa-qrcode"></i> Ver Código QR
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

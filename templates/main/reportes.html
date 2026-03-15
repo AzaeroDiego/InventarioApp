@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Reportes - Gestión de Inventario{% endblock %}
+{% block page_title %}Reportes y Análisis{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <div style="display: flex; gap: 10px;">
+            <a href="/api/reportes/exportar-csv?tipo=productos" class="btn btn-success">
+                <i class="fas fa-download"></i> Exportar Productos (CSV)
+            </a>
+            <a href="/api/reportes/exportar-csv?tipo=movimientos" class="btn btn-success">
+                <i class="fas fa-download"></i> Exportar Movimientos (CSV)
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-bar"></i> Productos Más Vendidos
+                </h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chart-vendidos"></canvas>
+                {% if productos_vendidos %}
+                <table class="table table-sm" style="margin-top: 15px;">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Salidas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prod_name, total in productos_vendidos[:5] %}
+                        <tr>
+                            <td>{{ prod_name }}</td>
+                            <td><strong>{{ total }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-pie-chart"></i> Valor del Inventario por Categoría
+                </h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chart-categoria"></canvas>
+                {% if valor_por_categoria %}
+                <table class="table table-sm" style="margin-top: 15px;">
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Valor Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat_name, valor in valor_por_categoria %}
+                        <tr>
+                            <td>{{ cat_name }}</td>
+                            <td><strong>${{ "{:.2f}".format(valor) }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-line"></i> Movimientos (Últimos 30 días)
+                </h3>
+            </div>
+            <div class="card-body">
+                <canvas id="chart-movimientos"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Gráfico de Productos Vendidos
+const ctxVendidos = document.getElementById('chart-vendidos').getContext('2d');
+const chartVendidos = new Chart(ctxVendidos, {
+    type: 'doughnut',
+    data: {
+        labels: [{% for prod_name, _ in productos_vendidos %}'{{ prod_name }}'{{ "," if not loop.last }}{% endfor %}],
+        datasets: [{
+            data: [{% for _, total in productos_vendidos %}{{ total }}{{ "," if not loop.last }}{% endfor %}],
+            backgroundColor: [
+                '#2ecc71',
+                '#3498db',
+                '#f39c12',
+                '#e74c3c',
+                '#9b59b6',
+                '#1abc9c',
+                '#34495e',
+                '#e67e22',
+                '#2c3e50',
+                '#16a085'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Gráfico de Valor por Categoría
+const ctxCategoria = document.getElementById('chart-categoria').getContext('2d');
+const chartCategoria = new Chart(ctxCategoria, {
+    type: 'bar',
+    data: {
+        labels: [{% for cat_name, _ in valor_por_categoria %}'{{ cat_name }}'{{ "," if not loop.last }}{% endfor %}],
+        datasets: [{
+            label: 'Valor Total ($)',
+            data: [{% for _, valor in valor_por_categoria %}{{ valor }}{{ "," if not loop.last }}{% endfor %}],
+            backgroundColor: '#2ecc71',
+            borderColor: '#27ae60',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Gráfico de Movimientos
+const ctxMovimientos = document.getElementById('chart-movimientos').getContext('2d');
+const chartMovimientos = new Chart(ctxMovimientos, {
+    type: 'line',
+    data: {
+        labels: [{% for fecha, _ in movimientos_30dias %}'{{ fecha }}'{{ "," if not loop.last }}{% endfor %}],
+        datasets: [{
+            label: 'Movimientos',
+            data: [{% for _, cantidad in movimientos_30dias %}{{ cantidad }}{{ "," if not loop.last }}{% endfor %}],
+            borderColor: '#2ecc71',
+            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Salida de Stock - Gestión de Inventario{% endblock %}
+{% block page_title %}Registrar Salida de Stock{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="producto_id">
+                            <i class="fas fa-box"></i> Producto *
+                        </label>
+                        <select id="producto_id" name="producto_id" required onchange="actualizarStock()">
+                            <option value="">Selecciona un producto</option>
+                            {% for prod in productos %}
+                            <option value="{{ prod.id }}" data-stock="{{ prod.cantidad_stock }}">
+                                {{ prod.nombre }} (SKU: {{ prod.sku }}) - Stock: {{ prod.cantidad_stock }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="alert alert-info" id="alerta-stock" style="display: none;">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Stock disponible: <strong id="stock-disponible">0</strong></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="cantidad">
+                                    <i class="fas fa-cubes"></i> Cantidad *
+                                </label>
+                                <input type="number" id="cantidad" name="cantidad" min="1" required>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="motivo">
+                                    <i class="fas fa-align-left"></i> Motivo *
+                                </label>
+                                <select id="motivo" name="motivo" required>
+                                    <option value="">Selecciona un motivo</option>
+                                    <option value="Venta">Venta</option>
+                                    <option value="Pérdida">Pérdida/Rotura</option>
+                                    <option value="Ajuste">Ajuste inventario</option>
+                                    <option value="Devolución">Devolución a proveedor</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-arrow-up"></i> Registrar Salida
+                        </button>
+                        <a href="{{ url_for('main.movimientos_stock') }}" class="btn btn-light">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-arrow-up"></i> Salidas
+                </h3>
+            </div>
+            <div class="card-body">
+                <p style="font-size: 13px; color: #7f8c8d;">
+                    Registra cuando sale stock del inventario. Se descuenta automáticamente del total.
+                </p>
+                <ul style="font-size: 13px; color: #7f8c8d; padding-left: 20px; line-height: 1.8;">
+                    <li>Verifica disponibilidad</li>
+                    <li>Ingresa la cantidad exacta</li>
+                    <li>Especifica el motivo</li>
+                    <li>Confirma la salida</li>
+                </ul>
+
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ecf0f1;">
+                    <p style="font-size: 12px; color: #e74c3c; margin: 0;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        No puedes registrar una salida si el stock es insuficiente.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function actualizarStock() {
+    const select = document.getElementById('producto_id');
+    const option = select.options[select.selectedIndex];
+    const stock = option.dataset.stock;
+    
+    if (stock !== undefined && stock !== '') {
+        document.getElementById('stock-disponible').textContent = stock;
+        document.getElementById('alerta-stock').style.display = 'flex';
+    } else {
+        document.getElementById('alerta-stock').style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

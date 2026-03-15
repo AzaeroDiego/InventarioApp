@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Registro de Ventas - Gestión de Inventario{% endblock %}
+{% block page_title %}📊 Registro de Ventas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-12">
+            <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center;">
+                <div>
+                    <a href="{{ url_for('main.nueva_venta') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Nueva Venta
+                    </a>
+                    <a href="{{ url_for('main.historial_ventas') }}" class="btn btn-secondary">
+                        <i class="fas fa-history"></i> Ver Historial
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESUMEN DEL DÍA -->
+    <div class="row" style="margin-bottom: 30px;">
+        <div class="col-4-custom">
+            <div class="stat-box" style="border-top-color: #2ecc71;">
+                <div class="stat-label">Ventas Hoy</div>
+                <div class="stat-value">{{ cantidad_ventas_hoy }}</div>
+                <div class="stat-subtitle">Transacciones</div>
+            </div>
+        </div>
+        <div class="col-4-custom">
+            <div class="stat-box" style="border-top-color: #3498db;">
+                <div class="stat-label">Total del Día</div>
+                <div class="stat-value">S/ {{ "%.2f"|format(total_ventas_hoy) }}</div>
+                <div class="stat-subtitle">Monto acumulado</div>
+            </div>
+        </div>
+        <div class="col-4-custom">
+            <div class="stat-box" style="border-top-color: #f39c12;">
+                <div class="stat-label">Promedio</div>
+                <div class="stat-value">
+                    {% if cantidad_ventas_hoy > 0 %}
+                        S/ {{ "%.2f"|format(total_ventas_hoy / cantidad_ventas_hoy) }}
+                    {% else %}
+                        S/ 0.00
+                    {% endif %}
+                </div>
+                <div class="stat-subtitle">Por transacción</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VENTAS DEL DÍA -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-receipt"></i> Ventas Registradas Hoy</h3>
+        </div>
+        <div class="card-body">
+            {% if ventas_hoy %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Hora</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unit.</th>
+                                <th>Total</th>
+                                <th>Motivo</th>
+                                <th>Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for venta in ventas_hoy %}
+                            <tr>
+                                <td>
+                                    <small>{{ venta.fecha.strftime('%H:%M:%S') }}</small>
+                                </td>
+                                <td>
+                                    <strong>{{ venta.producto.nombre }}</strong>
+                                    <br>
+                                    <small style="color: #7f8c8d;">SKU: {{ venta.producto.sku }}</small>
+                                </td>
+                                <td>{{ venta.cantidad }}</td>
+                                <td>S/ {{ "%.2f"|format(venta.precio_unitario) }}</td>
+                                <td>
+                                    <strong style="color: #2ecc71;">S/ {{ "%.2f"|format(venta.total) }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge badge-info">{{ venta.motivo }}</span>
+                                </td>
+                                <td>{{ venta.usuario.nombre_completo }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 40px; color: #95a5a6;">
+                    <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                    <p>No hay ventas registradas hoy</p>
+                    <a href="{{ url_for('main.nueva_venta') }}" class="btn btn-primary" style="margin-top: 15px;">
+                        <i class="fas fa-plus"></i> Registrar Primera Venta
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.col-4-custom {
+    flex: 1;
+    min-width: 200px;
+}
+
+@media (max-width: 768px) {
+    .col-4-custom {
+        flex: 1 1 100%;
+        margin-bottom: 15px;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Lotes Preparados - Gestión de Inventario{% endblock %}
+{% block page_title %}🍷 Lotes Preparados{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-12">
+            <a href="{{ url_for('main.nuevo_lote') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Preparar Nuevo Lote
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-list"></i> Lotes Registrados</h3>
+        </div>
+        <div class="card-body">
+            {% if lotes %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Preparadas</th>
+                                <th>Vendidas</th>
+                                <th>Disponibles</th>
+                                <th>Costo</th>
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lote in lotes %}
+                            <tr>
+                                <td>
+                                    <strong>{{ lote.nombre }}</strong>
+                                    {% if lote.descripcion %}
+                                    <br><small style="color: #7f8c8d;">{{ lote.descripcion }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge badge-info">{{ lote.cantidad_preparada }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-success">{{ lote.cantidad_vendida }}</span>
+                                </td>
+                                <td>
+                                    <strong style="{% if lote.cantidad_restante == 0 %}color: #e74c3c;{% else %}color: #2ecc71;{% endif %}">
+                                        {{ lote.cantidad_restante }}
+                                    </strong>
+                                </td>
+                                <td>S/ {{ "%.2f"|format(lote.costo_total) }}</td>
+                                <td><small>{{ lote.fecha_preparacion.strftime('%d/%m/%Y %H:%M') }}</small></td>
+                                <td>{{ lote.usuario.nombre_completo }}</td>
+                            </tr>
+                            {% if lote.ingredientes %}
+                            <tr style="background: #f8f9fa;">
+                                <td colspan="7">
+                                    <strong>Ingredientes:</strong><br>
+                                    {% for ing in lote.ingredientes %}
+                                        • {{ ing.producto.nombre }}: {{ ing.cantidad_usada }}
+                                        (S/ {{ "%.2f"|format(ing.costo_unitario * ing.cantidad_usada) }})
+                                        {% if not loop.last %}<br>{% endif %}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 40px; color: #95a5a6;">
+                    <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                    <p>No hay lotes preparados</p>
+                    <a href="{{ url_for('main.nuevo_lote') }}" class="btn btn-primary" style="margin-top: 15px;">
+                        <i class="fas fa-plus"></i> Preparar Primer Lote
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

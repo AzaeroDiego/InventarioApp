@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Vendedor - Gestión de Inventario{% endblock %}
+{% block page_title %}✏️ Editar Vendedor{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>{{ vendedor.nombre }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="nombre"><strong>Nombre Completo *</strong></label>
+                            <input type="text" id="nombre" name="nombre" value="{{ vendedor.nombre }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email"><strong>Email</strong></label>
+                            <input type="email" id="email" name="email" value="{{ vendedor.email or '' }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="telefono"><strong>Teléfono</strong></label>
+                            <input type="tel" id="telefono" name="telefono" value="{{ vendedor.telefono or '' }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="comision"><strong>Comisión (%)</strong></label>
+                            <input type="number" id="comision" name="comision" step="0.1" min="0" max="100" value="{{ vendedor.comision_porcentaje }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" name="activo" {% if vendedor.activo %}checked{% endif %}>
+                                <strong>Vendedor Activo</strong>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                            <a href="{{ url_for('main.vendedores') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

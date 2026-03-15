@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de Ventas - Gestión de Inventario{% endblock %}
+{% block page_title %}📋 Historial de Ventas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-12">
+            <a href="{{ url_for('main.nueva_venta') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nueva Venta
+            </a>
+            <a href="{{ url_for('main.ventas') }}" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Ventas Hoy
+            </a>
+        </div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="card" style="margin-bottom: 20px;">
+        <div class="card-body">
+            <form method="GET" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
+                <div style="flex: 1; min-width: 200px;">
+                    <label><small style="color: #7f8c8d;">Producto</small></label>
+                    <select name="producto_id">
+                        <option value="">-- Todos los productos --</option>
+                        {% for producto in productos %}
+                        <option value="{{ producto.id }}" {% if request.args.get('producto_id')|int == producto.id %}selected{% endif %}>
+                            {{ producto.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="flex: 1; min-width: 150px;">
+                    <label><small style="color: #7f8c8d;">Desde</small></label>
+                    <input type="date" name="fecha_desde" value="{{ request.args.get('fecha_desde', '') }}">
+                </div>
+
+                <div style="flex: 1; min-width: 150px;">
+                    <label><small style="color: #7f8c8d;">Hasta</small></label>
+                    <input type="date" name="fecha_hasta" value="{{ request.args.get('fecha_hasta', '') }}">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="height: 36px;">
+                    <i class="fas fa-filter"></i> Filtrar
+                </button>
+
+                <a href="{{ url_for('main.historial_ventas') }}" class="btn btn-secondary" style="height: 36px;">
+                    <i class="fas fa-redo"></i>
+                </a>
+            </form>
+        </div>
+    </div>
+
+    <!-- RESUMEN -->
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-4-custom">
+            <div class="stat-box" style="border-top-color: #2ecc71;">
+                <div class="stat-label">Total Vendido</div>
+                <div class="stat-value">S/ {{ "%.2f"|format(total_vendido) }}</div>
+            </div>
+        </div>
+        <div class="col-4-custom">
+            <div class="stat-box" style="border-top-color: #3498db;">
+                <div class="stat-label">Total Transacciones</div>
+                <div class="stat-value">{{ ventas.total }}</div>
+            </div>
+        </div>
+        <div class="col-4-custom">
+            <div class="stat-box" style="border-top-color: #f39c12;">
+                <div class="stat-label">Promedio</div>
+                <div class="stat-value">
+                    {% if ventas.total > 0 %}
+                        S/ {{ "%.2f"|format(total_vendido / ventas.total) }}
+                    {% else %}
+                        S/ 0.00
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA DE VENTAS -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-list"></i> Registro de Ventas</h3>
+        </div>
+        <div class="card-body">
+            {% if ventas.items %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unit.</th>
+                                <th>Total</th>
+                                <th>Motivo</th>
+                                <th>Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for venta in ventas.items %}
+                            <tr>
+                                <td>
+                                    <small>{{ venta.fecha.strftime('%d/%m/%Y %H:%M:%S') }}</small>
+                                </td>
+                                <td>
+                                    <strong>{{ venta.producto.nombre }}</strong>
+                                    <br>
+                                    <small style="color: #7f8c8d;">SKU: {{ venta.producto.sku }}</small>
+                                </td>
+                                <td>{{ venta.cantidad }}</td>
+                                <td>S/ {{ "%.2f"|format(venta.precio_unitario) }}</td>
+                                <td>
+                                    <strong style="color: #2ecc71;">S/ {{ "%.2f"|format(venta.total) }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge badge-info">{{ venta.motivo }}</span>
+                                </td>
+                                <td>{{ venta.usuario.nombre_completo }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PAGINACIÓN -->
+                {% if ventas.pages > 1 %}
+                <div style="text-align: center; margin-top: 20px;">
+                    <nav style="display: inline-block;">
+                        {% if ventas.has_prev %}
+                            <a href="{{ url_for('main.historial_ventas', page=ventas.prev_num, **request.args) }}" class="btn btn-light" style="padding: 5px 10px;">
+                                ← Anterior
+                            </a>
+                        {% endif %}
+
+                        {% for page_num in ventas.iter_pages() %}
+                            {% if page_num %}
+                                {% if page_num == ventas.page %}
+                                    <button class="btn btn-primary" style="padding: 5px 10px; margin: 0 2px;">{{ page_num }}</button>
+                                {% else %}
+                                    <a href="{{ url_for('main.historial_ventas', page=page_num, **request.args) }}" class="btn btn-light" style="padding: 5px 10px; margin: 0 2px;">{{ page_num }}</a>
+                                {% endif %}
+                            {% else %}
+                                <span style="margin: 0 5px;">...</span>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if ventas.has_next %}
+                            <a href="{{ url_for('main.historial_ventas', page=ventas.next_num, **request.args) }}" class="btn btn-light" style="padding: 5px 10px;">
+                                Siguiente →
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+                {% endif %}
+            {% else %}
+                <div style="text-align: center; padding: 40px; color: #95a5a6;">
+                    <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                    <p>No hay ventas registradas con los filtros seleccionados</p>
+                    <a href="{{ url_for('main.nueva_venta') }}" class="btn btn-primary" style="margin-top: 15px;">
+                        <i class="fas fa-plus"></i> Registrar Nueva Venta
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.col-4-custom {
+    flex: 1;
+    min-width: 200px;
+}
+
+@media (max-width: 768px) {
+    .col-4-custom {
+        flex: 1 1 100%;
+        margin-bottom: 15px;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Inventario - Guía Rápida</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2ecc71;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            border-bottom: 3px solid #2ecc71;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #2ecc71;
+            border-radius: 4px;
+        }
+
+        .step-number {
+            background: #2ecc71;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .step h3 {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .step p {
+            color: #7f8c8d;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .feature {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .feature h3 {
+            color: #2c3e50;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .feature p {
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #2ecc71;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .credentials {
+            background: #e8f4f8;
+            padding: 20px;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .credentials h3 {
+            color: #2980b9;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .credential-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            color: #2c3e50;
+            font-size: 14px;
+            border-bottom: 1px solid #d6eaf8;
+        }
+
+        .credential-item:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: 600;
+            color: #2980b9;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 8px 0;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .checklist li:before {
+            content: "✓ ";
+            color: #2ecc71;
+            font-weight: 700;
+            margin-right: 8px;
+        }
+
+        .button {
+            display: inline-block;
+            background: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .button:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .steps, .features {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Sistema de Gestión de Inventario</h1>
+            <p>Para pequeños negocios - Bebidas y Licores</p>
+        </div>
+
+        <!-- INICIO RÁPIDO -->
+        <div class="section">
+            <h2>🚀 Inicio Rápido</h2>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Activar Entorno Virtual</h3>
+                    <p>Abre terminal en la carpeta InventarioApp y ejecuta:</p>
+                </div>
+                <div class="step">
+                    <div class="code-block">python -m venv venv<br>venv\Scripts\activate</div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Instalar Dependencias</h3>
+                    <p>Asegúrate de que el entorno virtual está activo:</p>
+                </div>
+                <div class="step">
+                    <div class="code-block">pip install -r requirements.txt</div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Inicializar Base de Datos</h3>
+                    <p>Crea las tablas e inserta datos iniciales:</p>
+                </div>
+                <div class="step">
+                    <div class="code-block">flask init-db</div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Ejecutar la Aplicación</h3>
+                    <p>Inicia el servidor de desarrollo:</p>
+                </div>
+                <div class="step">
+                    <div class="code-block">python run.py</div>
+                </div>
+            </div>
+
+            <div class="credentials">
+                <h3>👤 Credenciales de Prueba</h3>
+                <div class="credential-item">
+                    <span class="label">Email:</span>
+                    <span>demo@example.com</span>
+                </div>
+                <div class="credential-item">
+                    <span class="label">Contraseña:</span>
+                    <span>123456</span>
+                </div>
+                <div class="credential-item">
+                    <span class="label">URL de Acceso:</span>
+                    <span><span class="highlight">http://localhost:5000</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARACTERÍSTICAS -->
+        <div class="section">
+            <h2>✨ Características Principales</h2>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Autenticación Segura</h3>
+                    <p>Login con email y contraseña encriptada</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h3>Dashboard Ejecutivo</h3>
+                    <p>Métricas en tiempo real</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📦</div>
+                    <h3>CRUD de Productos</h3>
+                    <p>Crear, editar, eliminar productos</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h3>Control de Stock</h3>
+                    <p>Entradas, salidas e historial</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔔</div>
+                    <h3>Alertas de Stock</h3>
+                    <p>Notificaciones de bajo stock</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📈</div>
+                    <h3>Reportes Gráficos</h3>
+                    <p>Análisis con gráficos interactivos</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🏷️</div>
+                    <h3>Códigos QR</h3>
+                    <p>Automáticos y descargables</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📱</div>
+                    <h3>Responsive Design</h3>
+                    <p>Funciona en desktop y móvil</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📥</div>
+                    <h3>Exportar CSV</h3>
+                    <p>Descarga datos en Excel</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCTOS INICIALES -->
+        <div class="section">
+            <h2>📦 Productos Iniciales</h2>
+            <ul class="checklist">
+                <li><strong>Rebelde Paquete</strong> (REB-PKG) - $45.00</li>
+                <li><strong>Party Box Lata</strong> (PTY-LT) - $25.00</li>
+                <li><strong>Party Box 3L</strong> (PTY-3L) - $60.00</li>
+                <li><strong>Pisco 750ml</strong> (PSC-750) - $120.00</li>
+            </ul>
+        </div>
+
+        <!-- GUÍA DE USO PRINCIPAL -->
+        <div class="section">
+            <h2>📋 Uso Principal de la Aplicación</h2>
+            
+            <h3 style="color: #2c3e50; font-size: 16px; margin-top: 15px; margin-bottom: 10px;">1. Dashboard</h3>
+            <p style="color: #7f8c8d; font-size: 14px; margin-bottom: 15px;">
+                Al ingresar, verás el panel ejecutivo con métricas clave: total de productos, bajo stock, 
+                valor del inventario y alertas pendientes.
+            </p>
+
+            <h3 style="color: #2c3e50; font-size: 16px; margin-top: 15px; margin-bottom: 10px;">2. Gestionar Productos</h3>
+            <ul class="checklist">
+                <li>Crea nuevos productos con foto e información</li>
+                <li>Busca por nombre o SKU</li>
+                <li>Filtra por categoría o estado</li>
+                <li>Genera códigos QR automáticamente</li>
+            </ul>
+
+            <h3 style="color: #2c3e50; font-size: 16px; margin-top: 15px; margin-bottom: 10px;">3. Control de Stock</h3>
+            <ul class="checklist">
+                <li>Registra entradas (compras, devoluciones)</li>
+                <li>Registra salidas (ventas, pérdidas)</li>
+                <li>Visualiza historial completo</li>
+                <li>Sistema previene sobreventa</li>
+            </ul>
+
+            <h3 style="color: #2c3e50; font-size: 16px; margin-top: 15px; margin-bottom: 10px;">4. Alertas</h3>
+            <ul class="checklist">
+                <li>Alertas automáticas cuando stock es bajo</li>
+                <li>Visualización en sidebar con contador</li>
+                <li>Acceso rápido a registrar entrada</li>
+            </ul>
+
+            <h3 style="color: #2c3e50; font-size: 16px; margin-top: 15px; margin-bottom: 10px;">5. Reportes</h3>
+            <ul class="checklist">
+                <li>Gráficos de productos más vendidos</li>
+                <li>Valor por categoría</li>
+                <li>Movimientos de últimos 30 días</li>
+                <li>Exportar a CSV para análisis</li>
+            </ul>
+        </div>
+
+        <!-- ARCHIVOS IMPORTANTES -->
+        <div class="section">
+            <h2>📂 Archivos Importantes</h2>
+            <ul class="checklist">
+                <li><strong>run.py</strong> - Ejecutar la aplicación</li>
+                <li><strong>README.md</strong> - Guía de instalación completa</li>
+                <li><strong>MANUAL_USUARIO.md</strong> - Manual de usuario detallado</li>
+                <li><strong>ESPECIFICACIONES.md</strong> - Especificaciones técnicas</li>
+                <li><strong>PROJECT_SUMMARY.txt</strong> - Resumen del proyecto</li>
+            </ul>
+        </div>
+
+        <!-- TECNOLOGÍAS -->
+        <div class="section">
+            <h2>🛠️ Tecnologías Utilizadas</h2>
+            <ul class="checklist">
+                <li><strong>Flask</strong> - Framework web Python</li>
+                <li><strong>SQLAlchemy</strong> - ORM para base de datos</li>
+                <li><strong>SQLite</strong> - Base de datos ligera</li>
+                <li><strong>HTML5 + CSS3</strong> - Frontend responsivo</li>
+                <li><strong>Chart.js</strong> - Gráficos interactivos</li>
+                <li><strong>qrcode</strong> - Generación de códigos QR</li>
+            </ul>
+        </div>
+
+        <!-- SOPORTE -->
+        <div class="section" style="background: #f0f8ff; padding: 20px; border-radius: 4px; border-left: 4px solid #3498db;">
+            <h2>🆘 Necesitas ayuda?</h2>
+            <ul class="checklist">
+                <li>Lee el <strong>README.md</strong> para instrucciones de instalación</li>
+                <li>Consulta <strong>MANUAL_USUARIO.md</strong> para guía de uso</li>
+                <li>Verifica <strong>ESPECIFICACIONES.md</strong> para detalles técnicos</li>
+                <li>Abre la consola del navegador (F12) para ver logs</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ecf0f1;">
+            <p style="color: #7f8c8d; font-size: 14px;">
+                Desarrollado con ❤️ para pequeños negocios
+                <br>
+                <strong>Versión 1.0.0</strong> - 2026
+            </p>
+        </div>
+    </div>
+</body>
+</html>

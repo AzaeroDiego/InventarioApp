@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Vendedores - Gestión de Inventario{% endblock %}
+{% block page_title %}👥 Gestión de Vendedores{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-12">
+            <a href="{{ url_for('main.nuevo_vendedor') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Agregar Vendedor
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-users"></i> Vendedores {{ vendedores|length }}</h3>
+        </div>
+        <div class="card-body">
+            {% if vendedores %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Comisión %</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vendedor in vendedores %}
+                            <tr style="{% if not vendedor.activo %}opacity: 0.6;{% endif %}">
+                                <td><strong>{{ vendedor.nombre }}</strong></td>
+                                <td>{{ vendedor.email or '-' }}</td>
+                                <td>{{ vendedor.telefono or '-' }}</td>
+                                <td>{{ vendedor.comision_porcentaje }}%</td>
+                                <td>
+                                    {% if vendedor.activo %}
+                                        <span class="badge badge-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('main.editar_vendedor', id=vendedor.id) }}" class="btn btn-secondary" style="padding: 5px 10px; font-size: 12px;">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('main.eliminar_vendedor', id=vendedor.id) }}" style="display: inline;" onsubmit="return confirm('¿Eliminar este vendedor?');">
+                                        <button type="submit" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 40px; color: #95a5a6;">
+                    <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                    <p>No hay vendedores registrados</p>
+                    <a href="{{ url_for('main.nuevo_vendedor') }}" class="btn btn-primary" style="margin-top: 15px;">
+                        <i class="fas fa-plus"></i> Crear Primer Vendedor
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

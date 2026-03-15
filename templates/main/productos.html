@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Productos - Gestión de Inventario{% endblock %}
+{% block page_title %}Gestión de Productos{% endblock %}
+
+{% block content %}
+<div class="flex-between mb-3">
+    <div>
+        <h3 style="margin: 0;">
+            <i class="fas fa-box"></i> Lista de Productos
+        </h3>
+    </div>
+    <a href="{{ url_for('main.crear_producto') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nuevo Producto
+    </a>
+</div>
+
+<!-- Buscador y Filtros -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="GET" class="row" style="margin: 0;">
+            <div class="col-4">
+                <input type="text" name="buscar" placeholder="Buscar por nombre o SKU..." 
+                       value="{{ buscar }}" style="width: 100%;">
+            </div>
+
+            <div class="col-3">
+                <select name="categoria" style="width: 100%;">
+                    <option value="">Todas las categorías</option>
+                    {% for cat in categorias %}
+                    <option value="{{ cat.id }}" {% if categoria_id == cat.id %}selected{% endif %}>
+                        {{ cat.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-3">
+                <select name="estado" style="width: 100%;">
+                    <option value="todos" {% if estado == 'todos' %}selected{% endif %}>Todos</option>
+                    <option value="bajo_stock" {% if estado == 'bajo_stock' %}selected{% endif %}>Bajo Stock</option>
+                    <option value="sin_stock" {% if estado == 'sin_stock' %}selected{% endif %}>Sin Stock</option>
+                </select>
+            </div>
+
+            <div class="col-2">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de Productos -->
+<div class="card">
+    <div class="card-body">
+        {% if productos.items %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Venta</th>
+                    <th>Valor Total</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos.items %}
+                <tr>
+                    <td><strong>{{ producto.sku }}</strong></td>
+                    <td>{{ producto.nombre }}</td>
+                    <td>
+                        <span class="badge" style="background-color: {{ producto.categoria.color }}20; color: {{ producto.categoria.color }};">
+                            {{ producto.categoria.nombre }}
+                        </span>
+                    </td>
+                    <td>S/ {{ "{:.2f}".format(producto.precio) }}</td>
+                    <td>{{ producto.cantidad_stock }}</td>
+                    <td>
+                        {% if producto.se_vende %}
+                            <span class="badge badge-success">SI</span>
+                        {% else %}
+                            <span class="badge badge-info">NO (Ingrediente)</span>
+                        {% endif %}
+                    </td>
+                    <td>S/ {{ "{:,.2f}".format(producto.valor_total).replace(',', '.') }}</td>
+                    <td>
+                        {% if producto.bajo_stock %}
+                            <span class="badge badge-danger">Bajo Stock</span>
+                        {% elif producto.cantidad_stock == 0 %}
+                            <span class="badge badge-danger">Sin Stock</span>
+                        {% else %}
+                            <span class="badge badge-success">OK</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('main.editar_producto', id=producto.id) }}" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{{ producto.codigo_qr }}" target="_blank" class="btn btn-sm btn-info">
+                            <i class="fas fa-qrcode"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('main.eliminar_producto', id=producto.id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro?');">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Paginación -->
+        {% if productos.pages > 1 %}
+        <div class="pagination">
+            {% if productos.has_prev %}
+                <a href="{{ url_for('main.productos', pagina=productos.prev_num, buscar=buscar, categoria=categoria_id, estado=estado) }}">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </a>
+            {% endif %}
+
+            {% for page_num in productos.iter_pages() %}
+                {% if page_num %}
+                    {% if page_num == productos.page %}
+                    <span class="active">{{ page_num }}</span>
+                    {% else %}
+                    <a href="{{ url_for('main.productos', pagina=page_num, buscar=buscar, categoria=categoria_id, estado=estado) }}">
+                        {{ page_num }}
+                    </a>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            {% if productos.has_next %}
+                <a href="{{ url_for('main.productos', pagina=productos.next_num, buscar=buscar, categoria=categoria_id, estado=estado) }}">
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <p class="text-center text-muted">
+            <i class="fas fa-inbox"></i> No hay productos registrados
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
