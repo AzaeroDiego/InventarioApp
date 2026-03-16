@@ -926,11 +926,8 @@ def eliminar_lote(lote_id):
         return redirect(url_for('main.lotes'))
     
     try:
-        # Revertir el stock del producto final
-        producto_final = Producto.query.get_by_lote_name(lote.nombre)
-        if not producto_final:
-            # Intentar buscar por nombre exacto
-            producto_final = Producto.query.filter_by(nombre=lote.nombre).first()
+        # Buscar el producto final por nombre
+        producto_final = Producto.query.filter_by(nombre=lote.nombre).first()
         
         if producto_final:
             # Revertir stock del producto final
