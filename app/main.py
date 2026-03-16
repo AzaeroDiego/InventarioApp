@@ -732,13 +732,24 @@ def nuevo_lote():
     if request.method == 'POST':
         import json
         try:
-            nombre = request.form.get('nombre')
+            producto_final_id = request.form.get('nombre')
             descripcion = request.form.get('descripcion', '')
             cantidad_preparada = request.form.get('cantidad_preparada', type=int)
             ingredientes_json = request.form.get('ingredientes_json', '[]')
             
-            if not nombre or not cantidad_preparada:
-                flash('Nombre y cantidad son requeridos', 'error')
+            if not producto_final_id or not cantidad_preparada:
+                flash('Producto y cantidad son requeridos', 'error')
+                return redirect(url_for('main.nuevo_lote'))
+            
+            # Obtener el producto final
+            try:
+                producto_final_id = int(producto_final_id)
+                producto_final = Producto.query.get(producto_final_id)
+                if not producto_final:
+                    flash('Producto no encontrado', 'error')
+                    return redirect(url_for('main.nuevo_lote'))
+            except:
+                flash('ID de producto inválido', 'error')
                 return redirect(url_for('main.nuevo_lote'))
             
             # Parsear ingredientes desde JSON
@@ -787,9 +798,9 @@ def nuevo_lote():
                 flash('Debe agregar al menos un ingrediente válido', 'error')
                 return redirect(url_for('main.nuevo_lote'))
             
-            # Crear lote
+            # Crear lote con el nombre del producto final
             lote = Lote(
-                nombre=nombre,
+                nombre=producto_final.nombre,  # Usar el nombre real del producto
                 descripcion=descripcion,
                 cantidad_preparada=cantidad_preparada,
                 costo_total=costo_total,
@@ -820,29 +831,26 @@ def nuevo_lote():
                     tipo='salida',
                     cantidad=ing_data['cantidad'],
                     motivo='Preparación de lote',
-                    observaciones=f'Lote: {nombre}'
+                    observaciones=f'Lote: {producto_final.nombre}'
                 )
                 db.session.add(movimiento)
             
-            # Si el lote se llama "Yarda" o contiene "Yarda", aumentar stock de "Party Box Yarda 3L"
-            if 'yarda' in nombre.lower():
-                producto_yarda = Producto.query.filter_by(sku='PTY-YRD-3L').first()
-                if producto_yarda:
-                    producto_yarda.cantidad_stock += cantidad_preparada
-                    
-                    # Crear movimiento de entrada para el producto final
-                    movimiento_yarda = MovimientoStock(
-                        producto_id=producto_yarda.id,
-                        usuario_id=current_user.id,
-                        tipo='entrada',
-                        cantidad=cantidad_preparada,
-                        motivo='Preparación de lote',
-                        observaciones=f'Lote Yarda preparado: {nombre}'
-                    )
-                    db.session.add(movimiento_yarda)
+            # Aumentar stock del producto final
+            producto_final.cantidad_stock += cantidad_preparada
+            
+            # Crear movimiento de entrada para el producto final
+            movimiento_final = MovimientoStock(
+                producto_id=producto_final.id,
+                usuario_id=current_user.id,
+                tipo='entrada',
+                cantidad=cantidad_preparada,
+                motivo='Preparación de lote',
+                observaciones=f'Lote preparado: {producto_final.nombre}'
+            )
+            db.session.add(movimiento_final)
             
             db.session.commit()
-            flash(f'✅ Lote "{nombre}" preparado con {cantidad_preparada} unidades', 'success')
+            flash(f'✅ Lote "{producto_final.nombre}" preparado con {cantidad_preparada} unidades', 'success')
             return redirect(url_for('main.lotes'))
             
         except Exception as e:
