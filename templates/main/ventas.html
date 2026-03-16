@@ -69,6 +69,7 @@
                                 <th>Total</th>
                                 <th>Motivo</th>
                                 <th>Usuario</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -91,6 +92,19 @@
                                     <span class="badge badge-info">{{ venta.motivo }}</span>
                                 </td>
                                 <td>{{ venta.usuario.nombre_completo }}</td>
+                                <td>
+                                    <a href="{{ url_for('main.editar_venta', venta_id=venta.id) }}" 
+                                       class="btn btn-sm btn-info" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('main.eliminar_venta', venta_id=venta.id) }}" 
+                                          style="display: inline;" 
+                                          onsubmit="return confirm('¿Eliminar esta venta? Se revertirá el stock.');">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>

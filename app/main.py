@@ -543,6 +543,86 @@ def nueva_venta():
     return render_template('main/nueva_venta.html', productos=productos, vendedores=vendedores)
 
 
+@main_bp.route('/venta/editar/<int:venta_id>', methods=['GET', 'POST'])
+@login_required
+def editar_venta(venta_id):
+    """Editar venta (fecha y observaciones)"""
+    venta = Venta.query.get(venta_id)
+    
+    if not venta:
+        flash('Venta no encontrada', 'error')
+        return redirect(url_for('main.ventas'))
+    
+    if request.method == 'POST':
+        try:
+            venta.observaciones = request.form.get('observaciones', '')
+            fecha_str = request.form.get('fecha_venta')
+            
+            if fecha_str:
+                from datetime import datetime
+                try:
+                    venta.fecha = datetime.strptime(fecha_str, '%Y-%m-%dT%H:%M')
+                except:
+                    flash('Formato de fecha/hora inválido', 'error')
+                    return redirect(url_for('main.editar_venta', venta_id=venta_id))
+            
+            db.session.commit()
+            flash(f'✅ Venta actualizada correctamente', 'success')
+            return redirect(url_for('main.ventas'))
+        
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar venta: {str(e)}', 'error')
+            return redirect(url_for('main.editar_venta', venta_id=venta_id))
+    
+    return render_template('main/editar_venta.html', venta=venta)
+
+
+@main_bp.route('/venta/eliminar/<int:venta_id>', methods=['POST'])
+@login_required
+def eliminar_venta(venta_id):
+    """Eliminar una venta"""
+    venta = Venta.query.get(venta_id)
+    
+    if not venta:
+        flash('Venta no encontrada', 'error')
+        return redirect(url_for('main.ventas'))
+    
+    try:
+        # Revertir stock del producto
+        producto = Producto.query.get(venta.producto_id)
+        if producto:
+            producto.cantidad_stock += venta.cantidad
+            
+            # Crear movimiento de entrada para revertir la venta
+            movimiento = MovimientoStock(
+                producto_id=venta.producto_id,
+                usuario_id=current_user.id,
+                tipo='entrada',
+                cantidad=venta.cantidad,
+                motivo='Reversión por eliminación de venta',
+                observaciones=f'Venta eliminada: {producto.nombre}'
+            )
+            db.session.add(movimiento)
+        
+        # Si es un lote, revertir cantidad vendida
+        if venta.lote_id:
+            lote = Lote.query.get(venta.lote_id)
+            if lote:
+                lote.cantidad_vendida -= venta.cantidad
+        
+        db.session.delete(venta)
+        db.session.commit()
+        
+        flash(f'✅ Venta eliminada correctamente. Stock revertido.', 'success')
+        return redirect(url_for('main.ventas'))
+    
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar venta: {str(e)}', 'error')
+        return redirect(url_for('main.ventas'))
+
+
 @main_bp.route('/historial-ventas')
 @login_required
 def historial_ventas():
