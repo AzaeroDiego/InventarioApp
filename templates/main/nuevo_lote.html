@@ -36,6 +36,12 @@
                                    placeholder="Ej: 21" required>
                         </div>
 
+                        <div class="form-group">
+                            <label for="fecha_preparacion">Fecha de Preparación *</label>
+                            <input type="date" class="form-control" id="fecha_preparacion" 
+                                   name="fecha_preparacion" required>
+                        </div>
+
                         <hr>
 
                         <h4 style="margin-top: 30px; margin-bottom: 20px;">
@@ -276,6 +282,10 @@ document.getElementById('formLote').addEventListener('submit', function(e) {
 // Ejecutar al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
     llenarSelectProductosVenta();
+    
+    // Establecer fecha de hoy por defecto
+    const hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('fecha_preparacion').value = hoy;
 });
 </script>
 {% endblock %}

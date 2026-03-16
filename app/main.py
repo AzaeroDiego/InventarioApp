@@ -735,6 +735,7 @@ def nuevo_lote():
             producto_final_id = request.form.get('nombre')
             descripcion = request.form.get('descripcion', '')
             cantidad_preparada = request.form.get('cantidad_preparada', type=int)
+            fecha_preparacion = request.form.get('fecha_preparacion')
             ingredientes_json = request.form.get('ingredientes_json', '[]')
             
             if not producto_final_id or not cantidad_preparada:
@@ -799,12 +800,19 @@ def nuevo_lote():
                 return redirect(url_for('main.nuevo_lote'))
             
             # Crear lote con el nombre del producto final
+            from datetime import datetime
+            try:
+                fecha_lote = datetime.strptime(fecha_preparacion, '%Y-%m-%d') if fecha_preparacion else datetime.utcnow()
+            except:
+                fecha_lote = datetime.utcnow()
+            
             lote = Lote(
                 nombre=producto_final.nombre,  # Usar el nombre real del producto
                 descripcion=descripcion,
                 cantidad_preparada=cantidad_preparada,
                 costo_total=costo_total,
-                usuario_id=current_user.id
+                usuario_id=current_user.id,
+                fecha_preparacion=fecha_lote
             )
             
             db.session.add(lote)
@@ -870,6 +878,41 @@ def nuevo_lote():
     } for p in productos])
     
     return render_template('main/nuevo_lote.html', productos_json=productos_json)
+
+
+@main_bp.route('/lote/editar/<int:lote_id>', methods=['GET', 'POST'])
+@login_required
+def editar_lote(lote_id):
+    """Editar lote (fecha y descripción)"""
+    lote = Lote.query.get(lote_id)
+    
+    if not lote:
+        flash('Lote no encontrado', 'error')
+        return redirect(url_for('main.lotes'))
+    
+    if request.method == 'POST':
+        try:
+            lote.descripcion = request.form.get('descripcion', '')
+            fecha_str = request.form.get('fecha_preparacion')
+            
+            if fecha_str:
+                from datetime import datetime
+                try:
+                    lote.fecha_preparacion = datetime.strptime(fecha_str, '%Y-%m-%d')
+                except:
+                    flash('Formato de fecha inválido', 'error')
+                    return redirect(url_for('main.editar_lote', lote_id=lote_id))
+            
+            db.session.commit()
+            flash(f'✅ Lote "{lote.nombre}" actualizado', 'success')
+            return redirect(url_for('main.lotes'))
+        
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar lote: {str(e)}', 'error')
+            return redirect(url_for('main.editar_lote', lote_id=lote_id))
+    
+    return render_template('main/editar_lote.html', lote=lote)
 
 
 # ============ ADMINISTRACIÓN DE USUARIOS ============

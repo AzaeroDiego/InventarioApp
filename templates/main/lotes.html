@@ -30,6 +30,7 @@
                                 <th>Costo</th>
                                 <th>Fecha</th>
                                 <th>Usuario</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -55,6 +56,12 @@
                                 <td>S/ {{ "%.2f"|format(lote.costo_total) }}</td>
                                 <td><small>{{ lote.fecha_preparacion.strftime('%d/%m/%Y %H:%M') }}</small></td>
                                 <td>{{ lote.usuario.nombre_completo }}</td>
+                                <td>
+                                    <a href="{{ url_for('main.editar_lote', lote_id=lote.id) }}" 
+                                       class="btn btn-sm btn-info" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
                             </tr>
                             {% if lote.ingredientes %}
                             <tr style="background: #f8f9fa;">
