@@ -915,6 +915,68 @@ def editar_lote(lote_id):
     return render_template('main/editar_lote.html', lote=lote)
 
 
+@main_bp.route('/lote/eliminar/<int:lote_id>', methods=['POST'])
+@login_required
+def eliminar_lote(lote_id):
+    """Eliminar un lote"""
+    lote = Lote.query.get(lote_id)
+    
+    if not lote:
+        flash('Lote no encontrado', 'error')
+        return redirect(url_for('main.lotes'))
+    
+    try:
+        # Revertir el stock del producto final
+        producto_final = Producto.query.get_by_lote_name(lote.nombre)
+        if not producto_final:
+            # Intentar buscar por nombre exacto
+            producto_final = Producto.query.filter_by(nombre=lote.nombre).first()
+        
+        if producto_final:
+            # Revertir stock del producto final
+            producto_final.cantidad_stock -= lote.cantidad_preparada
+            
+            # Crear movimiento de salida para revertir
+            movimiento_final = MovimientoStock(
+                producto_id=producto_final.id,
+                usuario_id=current_user.id,
+                tipo='salida',
+                cantidad=lote.cantidad_preparada,
+                motivo='Reversión por eliminación de lote',
+                observaciones=f'Lote eliminado: {lote.nombre}'
+            )
+            db.session.add(movimiento_final)
+        
+        # Revertir stock de ingredientes
+        for ingrediente in lote.ingredientes:
+            producto = Producto.query.get(ingrediente.producto_id)
+            if producto:
+                producto.cantidad_stock += ingrediente.cantidad_usada
+                
+                # Crear movimiento de entrada para revertir
+                movimiento = MovimientoStock(
+                    producto_id=ingrediente.producto_id,
+                    usuario_id=current_user.id,
+                    tipo='entrada',
+                    cantidad=ingrediente.cantidad_usada,
+                    motivo='Reversión por eliminación de lote',
+                    observaciones=f'Lote eliminado: {lote.nombre}'
+                )
+                db.session.add(movimiento)
+        
+        nombre_lote = lote.nombre
+        db.session.delete(lote)
+        db.session.commit()
+        
+        flash(f'✅ Lote "{nombre_lote}" eliminado correctamente. Stock revertido.', 'success')
+        return redirect(url_for('main.lotes'))
+    
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar lote: {str(e)}', 'error')
+        return redirect(url_for('main.lotes'))
+
+
 # ============ ADMINISTRACIÓN DE USUARIOS ============
 
 @main_bp.route('/admin/usuarios')

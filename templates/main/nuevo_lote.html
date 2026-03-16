@@ -283,8 +283,13 @@ document.getElementById('formLote').addEventListener('submit', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     llenarSelectProductosVenta();
     
-    // Establecer fecha de hoy por defecto
-    const hoy = new Date().toISOString().split('T')[0];
+    // Establecer fecha de hoy por defecto (FECHA LOCAL, no UTC)
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const hoy = `${year}-${month}-${day}`;
+    
     document.getElementById('fecha_preparacion').value = hoy;
 });
 </script>

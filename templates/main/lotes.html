@@ -61,6 +61,13 @@
                                        class="btn btn-sm btn-info" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    <form method="POST" action="{{ url_for('main.eliminar_lote', lote_id=lote.id) }}" 
+                                          style="display: inline;" 
+                                          onsubmit="return confirm('¿Eliminar este lote? Se revertirá todo el stock.');">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                             {% if lote.ingredientes %}
