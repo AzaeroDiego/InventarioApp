@@ -7,6 +7,7 @@ Sistema web moderno de gestión de inventario para pequeños negocios, desarroll
 ✅ **Dashboard** con métricas en tiempo real
 ✅ **CRUD completo** de productos y categorías
 ✅ **Gestión de stock** con entradas y salidas
+✅ **Control de Barra independiente** para cierre operativo sin afectar el inventario principal
 ✅ **Alertas automáticas** de bajo stock
 ✅ **Códigos QR** por producto
 ✅ **Reportes y gráficos** interactivos
@@ -94,6 +95,7 @@ InventarioApp/
 │   ├── models.py            # Modelos de base de datos
 │   ├── auth.py              # Rutas de autenticación
 │   ├── main.py              # Rutas principales
+│   ├── barra.py             # Control de barra independiente
 │   ├── api.py               # API Routes
 │   └── utils.py             # Funciones auxiliares
 ├── templates/
@@ -109,6 +111,7 @@ InventarioApp/
 │       ├── entrada_stock.html
 │       ├── salida_stock.html
 │       ├── movimientos_stock.html
+│       ├── control_barra.html # Cierre de barra
 │       ├── alertas.html
 │       └── reportes.html
 ├── static/
@@ -154,12 +157,20 @@ InventarioApp/
 - Filtrar por tipo de movimiento
 - Exportar historial
 
-### 5. Alertas
+### 5. Control de Barra
+- Apartado independiente del inventario principal.
+- Catálogo fijo de barra con productos y precios propios.
+- Registro por fecha, hora de cierre y usuario responsable.
+- Cálculo automático: **stock inicial - stock restante = cantidad vendida**.
+- Cálculo automático del dinero esperado por producto y total del cierre.
+- Comparación entre dinero calculado y monto entregado por el personal.
+
+### 6. Alertas
 - Alertas automáticas de bajo stock
 - Notificaciones en tiempo real
 - Acceso rápido a registrar entrada
 
-### 6. Reportes
+### 7. Reportes
 - Productos más vendidos (gráficos)
 - Valor por categoría (gráficos)
 - Movimientos de los últimos 30 días
@@ -172,6 +183,18 @@ Editar `config.py` para personalizar:
 - Claves secretas
 - Tamaño máximo de archivos
 - Rutas de subidas
+
+## 📝 Nota para SQLite existente
+
+Si ya ejecutaste la app antes y ya existe `inventario.db`, `db.create_all()` no agrega columnas nuevas a tablas existentes.
+
+Para una instalación local de prueba, lo más simple es borrar `inventario.db` y volver a iniciar la app.
+
+Si no quieres borrar datos, ejecuta este comando una sola vez sobre tu SQLite:
+
+```sql
+ALTER TABLE controles_barra ADD COLUMN hora_cierre VARCHAR(20);
+```
 
 ## 🔐 Seguridad
 
