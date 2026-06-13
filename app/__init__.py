@@ -32,10 +32,12 @@ def create_app(config_name='development'):
     from app.auth import auth_bp
     from app.main import main_bp
     from app.api import api_bp
+    from app.barra import barra_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp)
+    app.register_blueprint(barra_bp)
     
     # Crear tablas de base de datos
     with app.app_context():
