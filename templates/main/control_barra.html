@@ -7,7 +7,7 @@
 <style>
     .barra-grid {
         display: grid;
-        grid-template-columns: 1.4fr 1fr;
+        grid-template-columns: 1.45fr 1fr;
         gap: 20px;
         align-items: start;
     }
@@ -29,7 +29,7 @@
 
     .form-row {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 12px;
         margin-bottom: 14px;
     }
@@ -66,13 +66,14 @@
         border-bottom: 1px solid #ecf0f1;
         padding: 8px;
         text-align: left;
-        vertical-align: top;
+        vertical-align: middle;
     }
 
     .productos-table th {
         font-size: 12px;
         color: #7f8c8d;
         text-transform: uppercase;
+        white-space: nowrap;
     }
 
     .productos-table input {
@@ -81,6 +82,17 @@
         border: 1px solid #dce1e7;
         border-radius: 7px;
         padding: 8px;
+    }
+
+    .producto-nombre {
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .precio-fijo {
+        font-weight: 700;
+        color: #34495e;
+        white-space: nowrap;
     }
 
     .btn-barra {
@@ -97,16 +109,6 @@
     .btn-primary-barra {
         background: #2c3e50;
         color: white;
-    }
-
-    .btn-secondary-barra {
-        background: #ecf0f1;
-        color: #2c3e50;
-    }
-
-    .btn-danger-barra {
-        background: #fee;
-        color: #c0392b;
     }
 
     .totales-box {
@@ -170,7 +172,7 @@
         }
 
         .productos-table {
-            min-width: 720px;
+            min-width: 850px;
         }
 
         .table-responsive {
@@ -183,14 +185,19 @@
     <div class="barra-card">
         <h3><i class="fas fa-cash-register"></i> Nuevo cierre de barra</h3>
         <p style="color:#7f8c8d; margin-top:-6px;">
-            Este control es independiente del stock principal. Solo calcula vendidos según stock inicial menos stock final.
+            Este apartado no toma productos del inventario principal. Usa un catálogo fijo de barra y calcula: stock inicial - stock restante = cantidad vendida.
         </p>
 
         <form method="POST" id="formControlBarra">
             <div class="form-row">
                 <div class="form-group">
-                    <label>Fecha de operación</label>
+                    <label>Fecha</label>
                     <input type="date" name="fecha_operacion" value="{{ hoy }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Cierre</label>
+                    <input type="time" name="hora_cierre">
                 </div>
 
                 <div class="form-group">
@@ -214,37 +221,41 @@
                     <thead>
                         <tr>
                             <th>Producto</th>
+                            <th>Precio</th>
                             <th>Stock inicial</th>
-                            <th>Stock final</th>
-                            <th>Vendidos</th>
-                            <th>Precio unit.</th>
-                            <th>Total esperado</th>
-                            <th></th>
+                            <th>Stock restante</th>
+                            <th>Cantidad vendida</th>
+                            <th>Dinero calculado</th>
                         </tr>
                     </thead>
                     <tbody id="productosBody">
-                        <tr>
-                            <td><input type="text" name="producto[]" placeholder="Ej. Rebelde paquete" required></td>
-                            <td><input type="number" name="stock_inicial[]" class="stock-inicial" min="0" value="0" required></td>
-                            <td><input type="number" name="stock_final[]" class="stock-final" min="0" value="0" required></td>
-                            <td><input type="number" class="vendidos" value="0" readonly></td>
-                            <td><input type="number" name="precio_unitario[]" class="precio-unitario" min="0" step="0.01" value="0" required></td>
-                            <td><input type="number" class="total-esperado" value="0.00" readonly></td>
-                            <td><button type="button" class="btn-barra btn-danger-barra" onclick="eliminarFila(this)"><i class="fas fa-trash"></i></button></td>
-                        </tr>
+                        {% for item in catalogo_barra %}
+                            <tr>
+                                <td>
+                                    <span class="producto-nombre">{{ item.producto }}</span>
+                                    <input type="hidden" name="producto[]" value="{{ item.producto }}">
+                                </td>
+                                <td>
+                                    {% if item.precio > 0 %}
+                                        <span class="precio-fijo">S/ {{ '%.2f'|format(item.precio) }}</span>
+                                        <input type="hidden" name="precio_unitario[]" class="precio-unitario" value="{{ item.precio }}">
+                                    {% else %}
+                                        <input type="number" name="precio_unitario[]" class="precio-unitario" min="0" step="0.01" value="0" placeholder="Precio">
+                                    {% endif %}
+                                </td>
+                                <td><input type="number" name="stock_inicial[]" class="stock-inicial" min="0" value="0"></td>
+                                <td><input type="number" name="stock_final[]" class="stock-final" min="0" value="0"></td>
+                                <td><input type="number" class="vendidos" value="0" readonly></td>
+                                <td><input type="number" class="total-esperado" value="0.00" readonly></td>
+                            </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
 
-            <div style="margin-top:12px;">
-                <button type="button" class="btn-barra btn-secondary-barra" onclick="agregarFila()">
-                    <i class="fas fa-plus"></i> Agregar producto
-                </button>
-            </div>
-
             <div class="totales-box">
                 <div class="total-item">
-                    <span>Total esperado</span>
+                    <span>Dinero calculado</span>
                     <strong id="totalEsperadoVista">S/ 0.00</strong>
                 </div>
                 <div class="total-item">
@@ -259,12 +270,12 @@
 
             <div class="form-group">
                 <label>Observaciones</label>
-                <textarea name="observaciones" rows="3" placeholder="Ej. Faltante, sobrante, producto roto, cortesía, merma, etc."></textarea>
+                <textarea name="observaciones" rows="3" placeholder="Ej. Faltante, sobrante, cortesía, merma, producto roto, etc."></textarea>
             </div>
 
             <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
                 <button type="submit" class="btn-barra btn-primary-barra">
-                    <i class="fas fa-save"></i> Guardar control de barra
+                    <i class="fas fa-save"></i> Guardar cierre de barra
                 </button>
             </div>
         </form>
@@ -273,7 +284,7 @@
     <div class="barra-card">
         <h3><i class="fas fa-clock-rotate-left"></i> Últimos cierres</h3>
         <div class="total-item" style="margin-bottom:16px;">
-            <span>Total esperado hoy</span>
+            <span>Dinero calculado hoy</span>
             <strong>S/ {{ '%.2f'|format(total_dia) }}</strong>
         </div>
 
@@ -282,7 +293,8 @@
                 <div class="historial-item">
                     <div class="historial-head">
                         <div>
-                            <strong>{{ control.fecha_operacion.strftime('%d/%m/%Y') }}</strong><br>
+                            <strong>{{ control.fecha_operacion.strftime('%d/%m/%Y') }}</strong>
+                            {% if control.hora_cierre %}<strong> - {{ control.hora_cierre }}</strong>{% endif %}<br>
                             <span style="font-size:13px; color:#7f8c8d;">Responsable: {{ control.responsable.nombre_completo }}</span>
                         </div>
                         <div style="text-align:right;">
@@ -298,7 +310,7 @@
                     </div>
                     {% for detalle in control.detalles %}
                         <div class="detalle-mini">
-                            {{ detalle.producto }}: {{ detalle.stock_inicial }} - {{ detalle.stock_final }} = {{ detalle.vendidos }} vendidos × S/ {{ '%.2f'|format(detalle.precio_unitario) }}
+                            {{ detalle.producto }}: inicial {{ detalle.stock_inicial }} - restante {{ detalle.stock_final }} = {{ detalle.vendidos }} vendido(s) × S/ {{ '%.2f'|format(detalle.precio_unitario) }} = S/ {{ '%.2f'|format(detalle.total_esperado) }}
                         </div>
                     {% endfor %}
                     {% if control.observaciones %}
@@ -321,9 +333,9 @@
 
     function recalcularFila(fila) {
         const inicial = parseInt(fila.querySelector('.stock-inicial').value || 0, 10);
-        const final = parseInt(fila.querySelector('.stock-final').value || 0, 10);
+        const restante = parseInt(fila.querySelector('.stock-final').value || 0, 10);
         const precio = parseFloat(fila.querySelector('.precio-unitario').value || 0);
-        const vendidos = Math.max(inicial - final, 0);
+        const vendidos = Math.max(inicial - restante, 0);
         const total = vendidos * precio;
 
         fila.querySelector('.vendidos').value = vendidos;
@@ -345,33 +357,6 @@
         document.getElementById('diferenciaVista').textContent = formatearSoles(diferencia);
     }
 
-    function agregarFila() {
-        const body = document.getElementById('productosBody');
-        const fila = document.createElement('tr');
-        fila.innerHTML = `
-            <td><input type="text" name="producto[]" placeholder="Ej. Ron Cartavio" required></td>
-            <td><input type="number" name="stock_inicial[]" class="stock-inicial" min="0" value="0" required></td>
-            <td><input type="number" name="stock_final[]" class="stock-final" min="0" value="0" required></td>
-            <td><input type="number" class="vendidos" value="0" readonly></td>
-            <td><input type="number" name="precio_unitario[]" class="precio-unitario" min="0" step="0.01" value="0" required></td>
-            <td><input type="number" class="total-esperado" value="0.00" readonly></td>
-            <td><button type="button" class="btn-barra btn-danger-barra" onclick="eliminarFila(this)"><i class="fas fa-trash"></i></button></td>
-        `;
-        body.appendChild(fila);
-        fila.querySelectorAll('input').forEach(input => input.addEventListener('input', recalcularTotales));
-        recalcularTotales();
-    }
-
-    function eliminarFila(boton) {
-        const filas = document.querySelectorAll('#productosBody tr');
-        if (filas.length === 1) {
-            alert('Debe existir al menos una fila de producto.');
-            return;
-        }
-        boton.closest('tr').remove();
-        recalcularTotales();
-    }
-
     document.querySelectorAll('#productosBody input, #montoEntregado').forEach(input => {
         input.addEventListener('input', recalcularTotales);
     });
@@ -380,15 +365,15 @@
         let valido = true;
         document.querySelectorAll('#productosBody tr').forEach(fila => {
             const inicial = parseInt(fila.querySelector('.stock-inicial').value || 0, 10);
-            const final = parseInt(fila.querySelector('.stock-final').value || 0, 10);
-            if (final > inicial) {
+            const restante = parseInt(fila.querySelector('.stock-final').value || 0, 10);
+            if (restante > inicial) {
                 valido = false;
             }
         });
 
         if (!valido) {
             e.preventDefault();
-            alert('Revisa los productos: el stock final no puede ser mayor al stock inicial.');
+            alert('Revisa los productos: el stock restante no puede ser mayor al stock inicial.');
         }
     });
 
