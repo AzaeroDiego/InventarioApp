@@ -11,12 +11,42 @@ from app.models import Usuario
 barra_bp = Blueprint('barra', __name__)
 
 
+CATALOGO_BARRA = [
+    {'producto': 'Cerveza', 'precio': 15.00},
+    {'producto': 'Corona', 'precio': 15.00},
+    {'producto': 'Four loco', 'precio': 15.00},
+    {'producto': "Mike's", 'precio': 12.00},
+    {'producto': 'Smirnoff', 'precio': 90.00},
+    {'producto': 'Ruskaya', 'precio': 0.00},
+    {'producto': 'Wisky Red label', 'precio': 150.00},
+    {'producto': 'Wisky Black label', 'precio': 200.00},
+    {'producto': 'old time', 'precio': 80.00},
+    {'producto': 'Ron Cabo Blanco', 'precio': 50.00},
+    {'producto': 'agua', 'precio': 4.00},
+    {'producto': 'guaraná pequeña', 'precio': 5.00},
+    {'producto': 'guaraná grande', 'precio': 20.00},
+    {'producto': 'pepsi', 'precio': 5.00},
+    {'producto': 'coca cola', 'precio': 6.00},
+    {'producto': 'cusqueña pequeña', 'precio': 12.00},
+    {'producto': 'Cigarro', 'precio': 2.50},
+    {'producto': 'Ron cartavio', 'precio': 90.00},
+    {'producto': 'Pisco Sour', 'precio': 25.00},
+    {'producto': 'Margarita Corona', 'precio': 25.00},
+    {'producto': 'Mojito', 'precio': 40.00},
+    {'producto': 'Copa Pisco Sour', 'precio': 23.00},
+    {'producto': 'Sangría', 'precio': 15.00},
+]
+
+CATALOGO_BARRA_MAP = {item['producto']: item for item in CATALOGO_BARRA}
+
+
 class ControlBarra(db.Model):
     """Cabecera del control de barra por turno o cierre."""
     __tablename__ = 'controles_barra'
 
     id = db.Column(db.Integer, primary_key=True)
     fecha_operacion = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    hora_cierre = db.Column(db.String(20))
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     responsable_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     observaciones = db.Column(db.Text)
@@ -61,6 +91,7 @@ def control_barra():
     if request.method == 'POST':
         try:
             fecha_operacion_txt = request.form.get('fecha_operacion')
+            hora_cierre = request.form.get('hora_cierre', '').strip()
             responsable_id = request.form.get('responsable_id', type=int)
             monto_entregado = request.form.get('monto_entregado', 0, type=float) or 0
             observaciones = request.form.get('observaciones', '').strip()
@@ -75,7 +106,7 @@ def control_barra():
                 return redirect(url_for('barra.control_barra'))
 
             if not productos:
-                flash('Agrega al menos un producto para contabilizar la barra.', 'error')
+                flash('No se recibió el catálogo de productos de barra.', 'error')
                 return redirect(url_for('barra.control_barra'))
 
             try:
@@ -86,6 +117,7 @@ def control_barra():
 
             control = ControlBarra(
                 fecha_operacion=fecha_operacion,
+                hora_cierre=hora_cierre,
                 usuario_id=current_user.id,
                 responsable_id=responsable_id,
                 monto_entregado=monto_entregado,
@@ -94,24 +126,32 @@ def control_barra():
 
             for idx, nombre_producto in enumerate(productos):
                 nombre_producto = (nombre_producto or '').strip()
-                if not nombre_producto:
-                    continue
+                if nombre_producto not in CATALOGO_BARRA_MAP:
+                    flash(f'Producto de barra no permitido: {nombre_producto}', 'error')
+                    return redirect(url_for('barra.control_barra'))
 
                 try:
                     stock_inicial = int(stocks_iniciales[idx] or 0)
                     stock_final = int(stocks_finales[idx] or 0)
-                    precio_unitario = float(precios[idx] or 0)
+                    precio_form = float(precios[idx] or 0)
                 except (ValueError, IndexError):
-                    flash(f'Revisa cantidades y precio del producto: {nombre_producto}', 'error')
+                    flash(f'Revisa las cantidades del producto: {nombre_producto}', 'error')
                     return redirect(url_for('barra.control_barra'))
+
+                precio_catalogo = float(CATALOGO_BARRA_MAP[nombre_producto]['precio'])
+                precio_unitario = precio_catalogo if precio_catalogo > 0 else precio_form
 
                 if stock_inicial < 0 or stock_final < 0 or precio_unitario < 0:
                     flash('No se permiten valores negativos en stock o precio.', 'error')
                     return redirect(url_for('barra.control_barra'))
 
                 if stock_final > stock_inicial:
-                    flash(f'El stock final no puede ser mayor al inicial en: {nombre_producto}', 'error')
+                    flash(f'El stock restante no puede ser mayor al stock inicial en: {nombre_producto}', 'error')
                     return redirect(url_for('barra.control_barra'))
+
+                # Guardar solo productos que fueron contabilizados en la barra.
+                if stock_inicial == 0 and stock_final == 0:
+                    continue
 
                 detalle = DetalleControlBarra(
                     producto=nombre_producto,
@@ -123,19 +163,19 @@ def control_barra():
                 control.detalles.append(detalle)
 
             if not control.detalles:
-                flash('Agrega al menos un producto válido para guardar el control.', 'error')
+                flash('Ingresa stock inicial o stock restante en al menos un producto de barra.', 'error')
                 return redirect(url_for('barra.control_barra'))
 
             control.recalcular_totales()
             db.session.add(control)
             db.session.commit()
 
-            flash('✅ Control de barra guardado correctamente.', 'success')
+            flash('✅ Cierre de barra guardado correctamente.', 'success')
             return redirect(url_for('barra.control_barra'))
 
         except Exception as e:
             db.session.rollback()
-            flash(f'Error al guardar el control de barra: {str(e)}', 'error')
+            flash(f'Error al guardar el cierre de barra: {str(e)}', 'error')
             return redirect(url_for('barra.control_barra'))
 
     controles = ControlBarra.query.order_by(desc(ControlBarra.fecha_creacion)).limit(20).all()
@@ -148,5 +188,6 @@ def control_barra():
         usuarios=usuarios,
         controles=controles,
         total_dia=total_dia,
-        hoy=datetime.utcnow().date()
+        hoy=datetime.utcnow().date(),
+        catalogo_barra=CATALOGO_BARRA
     )
