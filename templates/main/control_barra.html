@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}Control de Barra{% endblock %}
+{% block page_title %}Control de Barra{% endblock %}
+
+{% block content %}
+<style>
+    .barra-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .barra-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .barra-card h3 {
+        margin: 0 0 16px 0;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #34495e;
+        font-size: 13px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        border: 1px solid #dce1e7;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .productos-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+    }
+
+    .productos-table th,
+    .productos-table td {
+        border-bottom: 1px solid #ecf0f1;
+        padding: 8px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .productos-table th {
+        font-size: 12px;
+        color: #7f8c8d;
+        text-transform: uppercase;
+    }
+
+    .productos-table input {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #dce1e7;
+        border-radius: 7px;
+        padding: 8px;
+    }
+
+    .btn-barra {
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-primary-barra {
+        background: #2c3e50;
+        color: white;
+    }
+
+    .btn-secondary-barra {
+        background: #ecf0f1;
+        color: #2c3e50;
+    }
+
+    .btn-danger-barra {
+        background: #fee;
+        color: #c0392b;
+    }
+
+    .totales-box {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin: 18px 0;
+    }
+
+    .total-item {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 14px;
+    }
+
+    .total-item span {
+        display: block;
+        font-size: 12px;
+        color: #7f8c8d;
+        margin-bottom: 4px;
+    }
+
+    .total-item strong {
+        color: #2c3e50;
+        font-size: 20px;
+    }
+
+    .historial-item {
+        border: 1px solid #ecf0f1;
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 12px;
+    }
+
+    .historial-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+    .historial-head strong {
+        color: #2c3e50;
+    }
+
+    .detalle-mini {
+        font-size: 13px;
+        color: #5d6d7e;
+        margin-top: 6px;
+    }
+
+    .diferencia-ok { color: #27ae60; }
+    .diferencia-falta { color: #c0392b; }
+    .diferencia-sobra { color: #d68910; }
+
+    @media (max-width: 980px) {
+        .barra-grid,
+        .form-row,
+        .totales-box {
+            grid-template-columns: 1fr;
+        }
+
+        .productos-table {
+            min-width: 720px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+    }
+</style>
+
+<div class="barra-grid">
+    <div class="barra-card">
+        <h3><i class="fas fa-cash-register"></i> Nuevo cierre de barra</h3>
+        <p style="color:#7f8c8d; margin-top:-6px;">
+            Este control es independiente del stock principal. Solo calcula vendidos según stock inicial menos stock final.
+        </p>
+
+        <form method="POST" id="formControlBarra">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha de operación</label>
+                    <input type="date" name="fecha_operacion" value="{{ hoy }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Usuario responsable de barra</label>
+                    <select name="responsable_id" required>
+                        <option value="">Seleccionar usuario</option>
+                        {% for usuario in usuarios %}
+                            <option value="{{ usuario.id }}">{{ usuario.nombre_completo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Monto entregado por personal</label>
+                    <input type="number" name="monto_entregado" id="montoEntregado" step="0.01" min="0" value="0">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="productos-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Stock inicial</th>
+                            <th>Stock final</th>
+                            <th>Vendidos</th>
+                            <th>Precio unit.</th>
+                            <th>Total esperado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="productosBody">
+                        <tr>
+                            <td><input type="text" name="producto[]" placeholder="Ej. Rebelde paquete" required></td>
+                            <td><input type="number" name="stock_inicial[]" class="stock-inicial" min="0" value="0" required></td>
+                            <td><input type="number" name="stock_final[]" class="stock-final" min="0" value="0" required></td>
+                            <td><input type="number" class="vendidos" value="0" readonly></td>
+                            <td><input type="number" name="precio_unitario[]" class="precio-unitario" min="0" step="0.01" value="0" required></td>
+                            <td><input type="number" class="total-esperado" value="0.00" readonly></td>
+                            <td><button type="button" class="btn-barra btn-danger-barra" onclick="eliminarFila(this)"><i class="fas fa-trash"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top:12px;">
+                <button type="button" class="btn-barra btn-secondary-barra" onclick="agregarFila()">
+                    <i class="fas fa-plus"></i> Agregar producto
+                </button>
+            </div>
+
+            <div class="totales-box">
+                <div class="total-item">
+                    <span>Total esperado</span>
+                    <strong id="totalEsperadoVista">S/ 0.00</strong>
+                </div>
+                <div class="total-item">
+                    <span>Monto entregado</span>
+                    <strong id="montoEntregadoVista">S/ 0.00</strong>
+                </div>
+                <div class="total-item">
+                    <span>Diferencia</span>
+                    <strong id="diferenciaVista">S/ 0.00</strong>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Observaciones</label>
+                <textarea name="observaciones" rows="3" placeholder="Ej. Faltante, sobrante, producto roto, cortesía, merma, etc."></textarea>
+            </div>
+
+            <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="submit" class="btn-barra btn-primary-barra">
+                    <i class="fas fa-save"></i> Guardar control de barra
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="barra-card">
+        <h3><i class="fas fa-clock-rotate-left"></i> Últimos cierres</h3>
+        <div class="total-item" style="margin-bottom:16px;">
+            <span>Total esperado hoy</span>
+            <strong>S/ {{ '%.2f'|format(total_dia) }}</strong>
+        </div>
+
+        {% if controles %}
+            {% for control in controles %}
+                <div class="historial-item">
+                    <div class="historial-head">
+                        <div>
+                            <strong>{{ control.fecha_operacion.strftime('%d/%m/%Y') }}</strong><br>
+                            <span style="font-size:13px; color:#7f8c8d;">Responsable: {{ control.responsable.nombre_completo }}</span>
+                        </div>
+                        <div style="text-align:right;">
+                            <strong>S/ {{ '%.2f'|format(control.total_esperado) }}</strong><br>
+                            {% if control.diferencia_caja == 0 %}
+                                <span class="diferencia-ok">Cuadrado</span>
+                            {% elif control.diferencia_caja < 0 %}
+                                <span class="diferencia-falta">Falta S/ {{ '%.2f'|format(control.diferencia_caja * -1) }}</span>
+                            {% else %}
+                                <span class="diferencia-sobra">Sobra S/ {{ '%.2f'|format(control.diferencia_caja) }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% for detalle in control.detalles %}
+                        <div class="detalle-mini">
+                            {{ detalle.producto }}: {{ detalle.stock_inicial }} - {{ detalle.stock_final }} = {{ detalle.vendidos }} vendidos × S/ {{ '%.2f'|format(detalle.precio_unitario) }}
+                        </div>
+                    {% endfor %}
+                    {% if control.observaciones %}
+                        <div class="detalle-mini"><strong>Obs.:</strong> {{ control.observaciones }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:#7f8c8d;">Aún no hay cierres de barra registrados.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function formatearSoles(valor) {
+        return `S/ ${valor.toFixed(2)}`;
+    }
+
+    function recalcularFila(fila) {
+        const inicial = parseInt(fila.querySelector('.stock-inicial').value || 0, 10);
+        const final = parseInt(fila.querySelector('.stock-final').value || 0, 10);
+        const precio = parseFloat(fila.querySelector('.precio-unitario').value || 0);
+        const vendidos = Math.max(inicial - final, 0);
+        const total = vendidos * precio;
+
+        fila.querySelector('.vendidos').value = vendidos;
+        fila.querySelector('.total-esperado').value = total.toFixed(2);
+    }
+
+    function recalcularTotales() {
+        let totalEsperado = 0;
+        document.querySelectorAll('#productosBody tr').forEach(fila => {
+            recalcularFila(fila);
+            totalEsperado += parseFloat(fila.querySelector('.total-esperado').value || 0);
+        });
+
+        const montoEntregado = parseFloat(document.getElementById('montoEntregado').value || 0);
+        const diferencia = montoEntregado - totalEsperado;
+
+        document.getElementById('totalEsperadoVista').textContent = formatearSoles(totalEsperado);
+        document.getElementById('montoEntregadoVista').textContent = formatearSoles(montoEntregado);
+        document.getElementById('diferenciaVista').textContent = formatearSoles(diferencia);
+    }
+
+    function agregarFila() {
+        const body = document.getElementById('productosBody');
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+            <td><input type="text" name="producto[]" placeholder="Ej. Ron Cartavio" required></td>
+            <td><input type="number" name="stock_inicial[]" class="stock-inicial" min="0" value="0" required></td>
+            <td><input type="number" name="stock_final[]" class="stock-final" min="0" value="0" required></td>
+            <td><input type="number" class="vendidos" value="0" readonly></td>
+            <td><input type="number" name="precio_unitario[]" class="precio-unitario" min="0" step="0.01" value="0" required></td>
+            <td><input type="number" class="total-esperado" value="0.00" readonly></td>
+            <td><button type="button" class="btn-barra btn-danger-barra" onclick="eliminarFila(this)"><i class="fas fa-trash"></i></button></td>
+        `;
+        body.appendChild(fila);
+        fila.querySelectorAll('input').forEach(input => input.addEventListener('input', recalcularTotales));
+        recalcularTotales();
+    }
+
+    function eliminarFila(boton) {
+        const filas = document.querySelectorAll('#productosBody tr');
+        if (filas.length === 1) {
+            alert('Debe existir al menos una fila de producto.');
+            return;
+        }
+        boton.closest('tr').remove();
+        recalcularTotales();
+    }
+
+    document.querySelectorAll('#productosBody input, #montoEntregado').forEach(input => {
+        input.addEventListener('input', recalcularTotales);
+    });
+
+    document.getElementById('formControlBarra').addEventListener('submit', function(e) {
+        let valido = true;
+        document.querySelectorAll('#productosBody tr').forEach(fila => {
+            const inicial = parseInt(fila.querySelector('.stock-inicial').value || 0, 10);
+            const final = parseInt(fila.querySelector('.stock-final').value || 0, 10);
+            if (final > inicial) {
+                valido = false;
+            }
+        });
+
+        if (!valido) {
+            e.preventDefault();
+            alert('Revisa los productos: el stock final no puede ser mayor al stock inicial.');
+        }
+    });
+
+    recalcularTotales();
+</script>
+{% endblock %}
