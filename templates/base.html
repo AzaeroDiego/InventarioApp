@@ -71,6 +71,13 @@
                     <span>Historial de Ventas</span>
                 </a>
 
+                <div class="section-title">Control Operativo</div>
+
+                <a href="{{ url_for('barra.control_barra') }}" class="{% if request.endpoint == 'barra.control_barra' %}active{% endif %}">
+                    <i class="fas fa-cash-register"></i>
+                    <span>Control de Barra</span>
+                </a>
+
                 <div class="section-title">Gestión Avanzada</div>
 
                 <a href="{{ url_for('main.lotes') }}" class="{% if request.endpoint == 'main.lotes' %}active{% endif %}">
