@@ -1,10 +1,13 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from sqlalchemy import MetaData
 from config import config
 import os
 
-db = SQLAlchemy()
+# En PostgreSQL/Supabase, usar explícitamente el schema inventario.
+# En SQLite este schema no se usa, porque config.py mantiene SQLite solo si no hay DATABASE_URL.
+db = SQLAlchemy(metadata=MetaData(schema="inventario"))
 login_manager = LoginManager()
 
 def create_app(config_name='development'):
