@@ -4,7 +4,10 @@ import pytz
 
 class Config:
     """Configuración base de la aplicación"""
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///inventario.db'
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///inventario.db")
+    SQLALCHEMY_ENGINE_OPTIONS = {
+    "pool_pre_ping": True
+    }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
