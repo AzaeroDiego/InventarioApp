@@ -33,11 +33,14 @@ def create_app(config_name='development'):
     
     # Registrar blueprints
     from app.auth import auth_bp
+    from app.analytics import analytics_bp
     from app.main import main_bp
     from app.api import api_bp
     from app.barra import barra_bp
     
     app.register_blueprint(auth_bp)
+    # Analytics se registra antes de main para reemplazar /dashboard y /reportes.
+    app.register_blueprint(analytics_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(barra_bp)
