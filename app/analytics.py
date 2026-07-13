@@ -253,9 +253,10 @@ def reportes():
         func.sum(Producto.precio * Producto.cantidad_stock).label('valor')
     ).join(Producto).filter(Producto.activo == True).group_by(Categoria.id, Categoria.nombre).all()
 
-    movimientos_30dias = db.session.query(
+    ventas_por_dia = db.session.query(
         func.date(Venta.fecha).label('fecha'),
-        func.sum(Venta.total).label('cantidad')
+        func.sum(Venta.total).label('total_vendido'),
+        func.sum(Venta.cantidad).label('unidades_vendidas')
     ).join(Producto, Producto.id == Venta.producto_id).filter(
         Producto.se_vende == True
     ).group_by(func.date(Venta.fecha)).order_by(func.date(Venta.fecha)).all()
@@ -266,7 +267,7 @@ def reportes():
         'main/reportes.html',
         productos_vendidos=productos_vendidos,
         valor_por_categoria=valor_por_categoria,
-        movimientos_30dias=movimientos_30dias,
+        movimientos_30dias=ventas_por_dia,
         resumen_mensual=resumen_mensual,
         meses_labels=[m['mes'] for m in resumen_mensual],
         ventas_mensuales_data=[round(m['ventas'], 2) for m in resumen_mensual],
