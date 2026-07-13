@@ -1,0 +1,35 @@
+/* Ajustes visuales de producción */
+
+/* Evita que el bloque de usuario se monte encima del menú lateral */
+.sidebar {
+    padding: 20px 0 0 !important;
+    overflow-y: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.sidebar-nav {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    padding-bottom: 12px !important;
+}
+
+.sidebar-user {
+    position: static !important;
+    bottom: auto !important;
+    width: 100% !important;
+    padding: 14px 20px 18px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(0, 0, 0, 0.12) !important;
+    flex-shrink: 0 !important;
+}
+
+.sidebar-user p {
+    margin-bottom: 8px !important;
+}
+
+.sidebar-user a {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
