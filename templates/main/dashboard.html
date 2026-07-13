@@ -4,12 +4,65 @@
 {% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
+<div class="card mb-4" style="border-left: 4px solid #3498db;">
+    <div class="card-body" style="display: flex; justify-content: space-between; gap: 15px; align-items: center; flex-wrap: wrap;">
+        <div>
+            <h3 style="margin: 0; color: #2c3e50;">Resumen de ventas</h3>
+            <p class="text-muted" style="margin: 4px 0 0;">
+                Mostrando la última fecha con ventas registradas, no necesariamente el día de hoy.
+            </p>
+        </div>
+        <div style="font-size: 14px; color: #7f8c8d;">
+            <strong>Fecha analizada:</strong>
+            {% if ultima_fecha_venta %}
+                {{ ultima_fecha_venta.strftime('%d/%m/%Y') if ultima_fecha_venta.__class__.__name__ != 'str' else ultima_fecha_venta }}
+            {% else %}
+                Sin ventas
+            {% endif %}
+        </div>
+    </div>
+</div>
+
 <div class="row">
+    <div class="col-3">
+        <div class="stat-box">
+            <i class="fas fa-receipt stat-icon" style="color: #27ae60;"></i>
+            <div class="stat-value">{{ cantidad_ventas_ultima_fecha or ventas_hoy|length }}</div>
+            <div class="stat-label">Ventas Registradas</div>
+        </div>
+    </div>
+
+    <div class="col-3">
+        <div class="stat-box info">
+            <i class="fas fa-money-bill-wave stat-icon" style="color: #3498db;"></i>
+            <div class="stat-value">S/ {{ "{:,.2f}".format(total_ventas_ultima_fecha or total_ventas_hoy or 0).replace(',', 'X').replace('.', ',').replace('X', '.') }}</div>
+            <div class="stat-label">Dinero Vendido</div>
+        </div>
+    </div>
+
+    <div class="col-3">
+        <div class="stat-box" style="border-top-color: #16a085;">
+            <i class="fas fa-chart-line stat-icon" style="color: #16a085;"></i>
+            <div class="stat-value">S/ {{ "{:,.2f}".format(utilidad_ultima_fecha or 0).replace(',', 'X').replace('.', ',').replace('X', '.') }}</div>
+            <div class="stat-label">Utilidad Estimada</div>
+        </div>
+    </div>
+
+    <div class="col-3">
+        <div class="stat-box warning">
+            <i class="fas fa-percent stat-icon" style="color: #f39c12;"></i>
+            <div class="stat-value">{{ "{:,.1f}".format(margen_ultima_fecha or 0).replace('.', ',') }}%</div>
+            <div class="stat-label">Margen Estimado</div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
     <div class="col-3">
         <div class="stat-box">
             <i class="fas fa-boxes stat-icon" style="color: #2ecc71;"></i>
             <div class="stat-value">{{ total_productos }}</div>
-            <div class="stat-label">Total de Productos</div>
+            <div class="stat-label">Productos Activos</div>
         </div>
     </div>
 
@@ -23,8 +76,8 @@
 
     <div class="col-3">
         <div class="stat-box info">
-            <i class="fas fa-dollar-sign stat-icon" style="color: #3498db;"></i>
-            <div class="stat-value">S/ {{ "{:,.2f}".format(valor_total).replace(',', '.') }}</div>
+            <i class="fas fa-warehouse stat-icon" style="color: #3498db;"></i>
+            <div class="stat-value">S/ {{ "{:,.2f}".format(valor_total).replace(',', 'X').replace('.', ',').replace('X', '.') }}</div>
             <div class="stat-label">Valor del Inventario</div>
         </div>
     </div>
@@ -38,27 +91,49 @@
     </div>
 </div>
 
-<!-- FILA DE VENTAS -->
 <div class="row mt-4">
-    <div class="col-3">
-        <div class="stat-box" style="border-top-color: #27ae60;">
-            <i class="fas fa-receipt stat-icon" style="color: #27ae60;"></i>
-            <div class="stat-value">{{ ventas_hoy|length }}</div>
-            <div class="stat-label">Ventas Hoy</div>
-            <a href="{{ url_for('main.ventas') }}" style="color: #3498db; text-decoration: none; font-size: 12px; margin-top: 5px; display: block;">
-                Ver detalle →
-            </a>
-        </div>
-    </div>
-
-    <div class="col-3">
-        <div class="stat-box" style="border-top-color: #16a085;">
-            <i class="fas fa-money-bill stat-icon" style="color: #16a085;"></i>
-            <div class="stat-value">S/ {{ "{:,.2f}".format(total_ventas_hoy).replace(',', '.') }}</div>
-            <div class="stat-label">Ingresos Hoy</div>
-            <a href="{{ url_for('main.historial_ventas') }}" style="color: #3498db; text-decoration: none; font-size: 12px; margin-top: 5px; display: block;">
-                Historial →
-            </a>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-ranking-star"></i> Ventas por Producto Final
+                </h3>
+            </div>
+            <div class="card-body">
+                {% if productos_ultima_fecha %}
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Producto final</th>
+                                <th>Cantidad</th>
+                                <th>Vendido</th>
+                                <th>Costo estimado</th>
+                                <th>Utilidad estimada</th>
+                                <th>Costo unitario estimado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prod in productos_ultima_fecha %}
+                            <tr>
+                                <td><strong>{{ prod.nombre }}</strong></td>
+                                <td>{{ prod.cantidad }}</td>
+                                <td>S/ {{ "{:,.2f}".format(prod.total).replace(',', 'X').replace('.', ',').replace('X', '.') }}</td>
+                                <td>S/ {{ "{:,.2f}".format(prod.costo).replace(',', 'X').replace('.', ',').replace('X', '.') }}</td>
+                                <td><strong>S/ {{ "{:,.2f}".format(prod.utilidad).replace(',', 'X').replace('.', ',').replace('X', '.') }}</strong></td>
+                                <td>S/ {{ "{:,.2f}".format(prod.costo_unitario).replace(',', 'X').replace('.', ',').replace('X', '.') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <p class="text-muted" style="font-size: 12px; margin-top: 10px;">
+                        La utilidad es estimada usando el costo promedio de preparación registrado en Lotes.
+                    </p>
+                {% else %}
+                    <p class="text-center text-muted">
+                        <i class="fas fa-inbox"></i> No hay ventas registradas para mostrar.
+                    </p>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
@@ -91,11 +166,6 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                    {% if productos_bajo_stock|length > 5 %}
-                    <p class="text-center text-muted mt-2">
-                        +{{ productos_bajo_stock|length - 5 }} más
-                    </p>
-                    {% endif %}
                 {% else %}
                     <p class="text-center text-muted">
                         <i class="fas fa-check-circle"></i> Todos los productos tienen stock adecuado
@@ -147,40 +217,6 @@
                         <i class="fas fa-inbox"></i> No hay movimientos registrados
                     </p>
                 {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-6">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-arrow-down"></i> Entradas (últimos 7 días)
-                </h3>
-            </div>
-            <div class="card-body">
-                <div style="text-align: center; font-size: 32px; font-weight: 700; color: #2ecc71;">
-                    {{ entradas_recientes }}
-                </div>
-                <p class="text-center text-muted mt-2">movimientos registrados</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-6">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-arrow-up"></i> Salidas (últimos 7 días)
-                </h3>
-            </div>
-            <div class="card-body">
-                <div style="text-align: center; font-size: 32px; font-weight: 700; color: #e74c3c;">
-                    {{ salidas_recientes }}
-                </div>
-                <p class="text-center text-muted mt-2">movimientos registrados</p>
             </div>
         </div>
     </div>
