@@ -10,7 +10,7 @@
 {% block content %}
 <div class="row">
     <div class="col-12 mb-3">
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <a href="/api/reportes/exportar-csv?tipo=productos" class="btn btn-success">
                 <i class="fas fa-download"></i> Exportar Productos (CSV)
             </a>
@@ -26,8 +26,11 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">
-                    <i class="fas fa-chart-bar"></i> Productos Más Vendidos
+                    <i class="fas fa-chart-bar"></i> Productos Finales Más Vendidos
                 </h3>
+                <p class="text-muted" style="font-size: 12px; margin-top: 6px;">
+                    Solo considera productos marcados como “se vende”. No incluye ingredientes como vodka, jarabe o insumos.
+                </p>
             </div>
             <div class="card-body">
                 <canvas id="chart-vendidos"></canvas>
@@ -35,8 +38,8 @@
                 <table class="table table-sm" style="margin-top: 15px;">
                     <thead>
                         <tr>
-                            <th>Producto</th>
-                            <th>Salidas</th>
+                            <th>Producto final</th>
+                            <th>Unidades vendidas</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -48,6 +51,10 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                {% else %}
+                <p class="text-center text-muted">
+                    <i class="fas fa-inbox"></i> No hay ventas de productos finales registradas.
+                </p>
                 {% endif %}
             </div>
         </div>
@@ -74,7 +81,7 @@
                         {% for cat_name, valor in valor_por_categoria %}
                         <tr>
                             <td>{{ cat_name }}</td>
-                            <td><strong>${{ "{:.2f}".format(valor) }}</strong></td>
+                            <td><strong>S/ {{ "{:,.2f}".format(valor or 0).replace(',', 'X').replace('.', ',').replace('X', '.') }}</strong></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -90,7 +97,7 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">
-                    <i class="fas fa-chart-line"></i> Movimientos (Últimos 30 días)
+                    <i class="fas fa-chart-line"></i> Ventas por Día
                 </h3>
             </div>
             <div class="card-body">
@@ -101,7 +108,7 @@
 </div>
 
 <script>
-// Gráfico de Productos Vendidos
+// Gráfico de Productos Finales Vendidos
 const ctxVendidos = document.getElementById('chart-vendidos').getContext('2d');
 const chartVendidos = new Chart(ctxVendidos, {
     type: 'doughnut',
@@ -140,8 +147,8 @@ const chartCategoria = new Chart(ctxCategoria, {
     data: {
         labels: [{% for cat_name, _ in valor_por_categoria %}'{{ cat_name }}'{{ "," if not loop.last }}{% endfor %}],
         datasets: [{
-            label: 'Valor Total ($)',
-            data: [{% for _, valor in valor_por_categoria %}{{ valor }}{{ "," if not loop.last }}{% endfor %}],
+            label: 'Valor Total (S/)',
+            data: [{% for _, valor in valor_por_categoria %}{{ valor or 0 }}{{ "," if not loop.last }}{% endfor %}],
             backgroundColor: '#2ecc71',
             borderColor: '#27ae60',
             borderWidth: 1
@@ -163,15 +170,15 @@ const chartCategoria = new Chart(ctxCategoria, {
     }
 });
 
-// Gráfico de Movimientos
+// Gráfico de Ventas por Día
 const ctxMovimientos = document.getElementById('chart-movimientos').getContext('2d');
 const chartMovimientos = new Chart(ctxMovimientos, {
     type: 'line',
     data: {
         labels: [{% for fecha, _ in movimientos_30dias %}'{{ fecha }}'{{ "," if not loop.last }}{% endfor %}],
         datasets: [{
-            label: 'Movimientos',
-            data: [{% for _, cantidad in movimientos_30dias %}{{ cantidad }}{{ "," if not loop.last }}{% endfor %}],
+            label: 'Ventas S/',
+            data: [{% for _, cantidad in movimientos_30dias %}{{ cantidad or 0 }}{{ "," if not loop.last }}{% endfor %}],
             borderColor: '#2ecc71',
             backgroundColor: 'rgba(46, 204, 113, 0.1)',
             borderWidth: 2,
