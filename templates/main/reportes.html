@@ -140,8 +140,11 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">
-                    <i class="fas fa-chart-line"></i> Ventas por Día
+                    <i class="fas fa-chart-line"></i> Ventas y Unidades Vendidas por Día
                 </h3>
+                <p class="text-muted" style="font-size: 12px; margin-top: 6px;">
+                    La línea verde muestra dinero vendido. La línea azul muestra cantidad de productos finales vendidos.
+                </p>
             </div>
             <div class="card-body">
                 <canvas id="chart-movimientos"></canvas>
@@ -259,24 +262,41 @@ const chartMensual = new Chart(ctxMensual, {
     }
 });
 
-// Gráfico de Ventas por Día
+// Gráfico de Ventas y Unidades por Día
 const ctxMovimientos = document.getElementById('chart-movimientos').getContext('2d');
 const chartMovimientos = new Chart(ctxMovimientos, {
     type: 'line',
     data: {
-        labels: [{% for fecha, _ in movimientos_30dias %}'{{ fecha }}'{{ "," if not loop.last }}{% endfor %}],
-        datasets: [{
-            label: 'Ventas S/',
-            data: [{% for _, cantidad in movimientos_30dias %}{{ cantidad or 0 }}{{ "," if not loop.last }}{% endfor %}],
-            borderColor: '#2ecc71',
-            backgroundColor: 'rgba(46, 204, 113, 0.1)',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.4
-        }]
+        labels: [{% for fecha, _, _ in movimientos_30dias %}'{{ fecha }}'{{ "," if not loop.last }}{% endfor %}],
+        datasets: [
+            {
+                label: 'Ventas S/',
+                data: [{% for _, total_vendido, _ in movimientos_30dias %}{{ total_vendido or 0 }}{{ "," if not loop.last }}{% endfor %}],
+                borderColor: '#2ecc71',
+                backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                yAxisID: 'y'
+            },
+            {
+                label: 'Unidades vendidas',
+                data: [{% for _, _, unidades_vendidas in movimientos_30dias %}{{ unidades_vendidas or 0 }}{{ "," if not loop.last }}{% endfor %}],
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                borderWidth: 2,
+                fill: false,
+                tension: 0.4,
+                yAxisID: 'y1'
+            }
+        ]
     },
     options: {
         responsive: true,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        },
         plugins: {
             legend: {
                 display: true,
@@ -285,7 +305,27 @@ const chartMovimientos = new Chart(ctxMovimientos, {
         },
         scales: {
             y: {
-                beginAtZero: true
+                type: 'linear',
+                display: true,
+                position: 'left',
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Ventas S/'
+                }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                beginAtZero: true,
+                grid: {
+                    drawOnChartArea: false
+                },
+                title: {
+                    display: true,
+                    text: 'Unidades'
+                }
             }
         }
     }
