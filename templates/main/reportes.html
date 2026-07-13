@@ -97,6 +97,49 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">
+                    <i class="fas fa-calendar-alt"></i> Ventas, Utilidad y Gasto de Stock por Mes
+                </h3>
+                <p class="text-muted" style="font-size: 12px; margin-top: 6px;">
+                    Muestra los últimos 6 meses cerrando en el último mes con data. La utilidad es estimada con el costo promedio de lotes. El gasto de stock considera entradas de stock y excluye entradas generadas por preparación de lotes.
+                </p>
+            </div>
+            <div class="card-body">
+                <canvas id="chart-mensual"></canvas>
+
+                {% if resumen_mensual %}
+                <table class="table table-sm" style="margin-top: 18px;">
+                    <thead>
+                        <tr>
+                            <th>Mes</th>
+                            <th>Ventas</th>
+                            <th>Utilidad estimada</th>
+                            <th>Margen</th>
+                            <th>Gasto ingreso stock</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mes in resumen_mensual %}
+                        <tr>
+                            <td><strong>{{ mes.mes }}</strong></td>
+                            <td>S/ {{ "{:,.2f}".format(mes.ventas or 0).replace(',', 'X').replace('.', ',').replace('X', '.') }}</td>
+                            <td><strong>S/ {{ "{:,.2f}".format(mes.utilidad or 0).replace(',', 'X').replace('.', ',').replace('X', '.') }}</strong></td>
+                            <td>{{ "{:.1f}".format(mes.margen or 0) }}%</td>
+                            <td>S/ {{ "{:,.2f}".format(mes.gasto_stock or 0).replace(',', 'X').replace('.', ',').replace('X', '.') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
                     <i class="fas fa-chart-line"></i> Ventas por Día
                 </h3>
             </div>
@@ -153,6 +196,52 @@ const chartCategoria = new Chart(ctxCategoria, {
             borderColor: '#27ae60',
             borderWidth: 1
         }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Gráfico Mensual: Ventas, Utilidad y Gasto de Stock
+const ctxMensual = document.getElementById('chart-mensual').getContext('2d');
+const chartMensual = new Chart(ctxMensual, {
+    type: 'bar',
+    data: {
+        labels: {{ meses_labels|tojson }},
+        datasets: [
+            {
+                label: 'Ventas S/',
+                data: {{ ventas_mensuales_data|tojson }},
+                backgroundColor: 'rgba(46, 204, 113, 0.65)',
+                borderColor: '#27ae60',
+                borderWidth: 1
+            },
+            {
+                label: 'Utilidad estimada S/',
+                data: {{ utilidad_mensual_data|tojson }},
+                backgroundColor: 'rgba(52, 152, 219, 0.65)',
+                borderColor: '#2980b9',
+                borderWidth: 1
+            },
+            {
+                label: 'Gasto ingreso stock S/',
+                data: {{ gastos_stock_data|tojson }},
+                backgroundColor: 'rgba(231, 76, 60, 0.55)',
+                borderColor: '#c0392b',
+                borderWidth: 1
+            }
+        ]
     },
     options: {
         responsive: true,
