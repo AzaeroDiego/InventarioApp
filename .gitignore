@@ -52,6 +52,7 @@ static/qrcodes/
 .pytest_cache/
 .coverage
 htmlcov/
+node_modules/
 
 # Logs
 *.log
