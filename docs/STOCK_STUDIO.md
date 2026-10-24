@@ -1,4 +1,9 @@
-# Stock Studio — interfaz en GitHub Pages, datos en PostgreSQL
+# Stock Studio — alternativa de compatibilidad con Flask
+
+**La arquitectura elegida ahora es GitHub Pages → Supabase, sin Render.**
+Consulta [SUPABASE_DIRECT.md](SUPABASE_DIRECT.md) para la implementación actual.
+Lo siguiente documenta la alternativa inicial con Flask, que permanece disponible
+para compatibilidad y no es la conexión predeterminada de la nueva web.
 
 ## Qué cambia
 

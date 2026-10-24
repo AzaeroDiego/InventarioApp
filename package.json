@@ -1,0 +1,10 @@
+{
+  "name": "stock-studio-validation",
+  "private": true,
+  "scripts": {
+    "test": "node --check web/studio.js && node --check web/supabase-client.js && node --check web/supabase-ui.js && node tests/supabase.test.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.11"
+  }
+}
