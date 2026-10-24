@@ -30,12 +30,12 @@ window.StockSupabase = (() => {
       await refreshing;
     }
   }
-  async function write(action,data){
+  async function write(action,data,rpc='stock_studio_write'){
     await ensureSession();
     let pending;try{pending=JSON.parse(sessionStorage.getItem('stock-pending-write')||'null')}catch{}
-    const fingerprint=JSON.stringify({action,data});
+    const fingerprint=JSON.stringify({rpc,action,data});
     if(!pending||pending.fingerprint!==fingerprint){pending={fingerprint,key:crypto.randomUUID()};sessionStorage.setItem('stock-pending-write',JSON.stringify(pending))}
-    try{const result=await request('/rest/v1/rpc/stock_studio_write',{p_action:action,p_data:data,p_request_id:pending.key},true);sessionStorage.removeItem('stock-pending-write');return result}
+    try{const result=await request('/rest/v1/rpc/'+rpc,{p_action:action,p_data:data,p_request_id:pending.key},true);sessionStorage.removeItem('stock-pending-write');return result}
     catch(error){if(!error.uncertain)sessionStorage.removeItem('stock-pending-write');throw error}
   }
   return {
@@ -51,6 +51,9 @@ window.StockSupabase = (() => {
       if(path==='login'){const s=await this.login(body.email,body.password);return {token:s.access_token}}
       await ensureSession();
       if(path==='data')return request('/rest/v1/rpc/stock_studio_data',{},true);
+      if(path==='sales-report')return request('/rest/v1/rpc/stock_studio_sales_report',body,true);
+      if(path==='sales-audit')return request('/rest/v1/rpc/stock_studio_sales_audit',{p_sale:body.id},true);
+      if(path.startsWith('sales-admin/'))return write(path.slice(12),body,'stock_studio_sales_admin');
       if(path==='products')return write('product_save',body);
       if(path==='movements')return write('movement',body);
       if(path.startsWith('action/'))return write(path.slice(7),body);
