@@ -14,7 +14,9 @@ Flask anterior se conserva como alternativa, pero no es la ruta predeterminada.
 - La clave pública funciona. Supabase tiene el acceso por correo habilitado y
   requiere confirmación de correo.
 - No se migraron, actualizaron ni borraron filas de producción.
-- La instalación de las nuevas funciones en producción está pendiente de autorización.
+- La instalación de las nuevas funciones fue autorizada y realizada el 24 de octubre de 2026.
+  Se comprobó que no cambiara la cantidad de registros de las once tablas del negocio.
+  La API pública devuelve 401 a llamadas anónimas de lectura y escritura.
 
 ## Acceso sin cambiar las contraseñas existentes
 
@@ -24,19 +26,21 @@ la propiedad de ese correo. No se envían contraseñas antiguas ni hashes al nav
 Los usuarios nuevos de Auth sin correspondencia activa en el inventario no reciben acceso.
 Cada operación comprueba el estado y los permisos actuales, sin confiar en el frontend.
 
-En Supabase → Authentication → URL Configuration se debe añadir:
+En Supabase → Authentication → URL Configuration se añade únicamente:
 
 ```text
-Site URL: https://azaerodiego.github.io/InventarioApp/
 Redirect URLs: https://azaerodiego.github.io/InventarioApp/
 ```
 
+Se conserva la Site URL predeterminada de CuentasPersonales y su redirect existente,
+porque el mismo proyecto de Supabase se comparte con esa otra aplicación.
+La nueva web envía su destino explícitamente mediante `redirect_to`.
 Para pruebas locales puede añadirse temporalmente `http://127.0.0.1:5178/`.
-No se han cambiado esas opciones todavía. No se enviaron correos de acceso durante
+No se enviaron correos de acceso durante
 el desarrollo. Si los correos se bloquean por límites del proveedor de correo
 compartido de Supabase, debe configurarse el envío para los usuarios del proyecto.
 
-## Instalación SQL que requiere autorización
+## Instalación SQL autorizada
 
 El archivo `supabase/migrations/20261024_stock_studio.sql` crea:
 
@@ -59,6 +63,8 @@ El registro interno de solicitudes guarda el actor, la operación, sus datos y e
 Una prueba transaccional en producción fue rechazada por revisión automática.
 No se ejecutó. En su lugar, las funciones se verificaron en PostgreSQL WASM local,
 sin red ni credenciales, con tablas y usuarios ficticios.
+Posteriormente el usuario autorizó instalar el script. La instalación se realizó
+en una única transacción y verificó los permisos antes de confirmar los cambios.
 
 ## Funciones de la interfaz
 
@@ -94,7 +100,7 @@ Las seis pruebas Python validan la ruta alternativa de Flask con una base aislad
 
 ## Publicación pendiente
 
-El repositorio no tiene GitHub Pages habilitado. El flujo `pages.yml` publica `web/`
+GitHub Pages ya está habilitado con GitHub Actions. El flujo `pages.yml` publica `web/`
 al integrarse en `main`, una vez elegida GitHub Actions en Settings → Pages.
 La clave publishable de `web/config.js` es pública por diseño. No deben añadirse
 contraseñas PostgreSQL, claves secretas ni `service_role` al código ni a Pages.
