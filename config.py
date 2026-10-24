@@ -9,6 +9,8 @@ class Config:
     "pool_pre_ping": True
     }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    AUTO_CREATE_TABLES = os.environ.get('AUTO_CREATE_TABLES', 'true').lower() == 'true'
+    PAGES_ORIGIN = os.environ.get('PAGES_ORIGIN', 'https://azaerodiego.github.io')
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
     # Zona horaria (Perú: UTC-5)
@@ -37,6 +39,7 @@ class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
     SESSION_COOKIE_SECURE = True
+    AUTO_CREATE_TABLES = os.environ.get('AUTO_CREATE_TABLES', 'false').lower() == 'true'
 
 
 class TestingConfig(Config):
