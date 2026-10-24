@@ -98,10 +98,14 @@ inválidos, SKU duplicado, creación/edición de productos, entradas, ventas, st
 insuficiente, ajustes a cero, lotes, cierres independientes e idempotencia.
 Las seis pruebas Python validan la ruta alternativa de Flask con una base aislada.
 
-## Publicación pendiente
+## Publicación
 
-GitHub Pages ya está habilitado con GitHub Actions. El flujo `pages.yml` publica `web/`
-al integrarse en `main`, una vez elegida GitHub Actions en Settings → Pages.
+La web está publicada en `https://azaerodiego.github.io/InventarioApp/`.
+El despliegue `Publish Stock Studio` terminó correctamente el 24 de octubre de 2026.
+GitHub Pages usa GitHub Actions y el flujo `pages.yml` publica `web/` al integrar cambios
+de la interfaz en `main`. Se verificó que el sitio público muestra la pantalla de acceso.
+La prueba de acceso real mediante correo corresponde al usuario; no se crean identidades
+ficticias en producción ni se solicitan contraseñas privadas para validarla.
 La clave publishable de `web/config.js` es pública por diseño. No deben añadirse
 contraseñas PostgreSQL, claves secretas ni `service_role` al código ni a Pages.
 
